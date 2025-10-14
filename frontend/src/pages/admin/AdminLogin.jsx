@@ -75,7 +75,17 @@ const AdminLogin = () => {
                     >
                         {loading ? 'Signing in...' : 'Sign In as Admin'}
                     </button>
+
                 </form>
+                
+                <div className="text-center">
+                    <button
+                        onClick={() => navigate('/admin/signup')}
+                        className="text-blue-600 hover:text-blue-800"
+                    >
+                        Create New Admin Account
+                    </button>
+                </div>
             </div>
         </div>
     );

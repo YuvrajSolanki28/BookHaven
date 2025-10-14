@@ -1,6 +1,9 @@
 import React from "react";
 import { Facebook, Twitter, Instagram } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 const Footer = () => {
+  const { user } = useAuth();
+
   return (
     <footer className="text-gray-300 bg-gray-900">
       <div className="px-4 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -36,11 +39,13 @@ const Footer = () => {
                   Shipping Info
                 </a>
               </li>
-              <li>
-                <a href="/admin/login" className="text-sm hover:text-white">
-                  Admin Login
-                </a>
-              </li>
+              {!user && (
+                <li>
+                  <a href="/admin/login" className="text-sm hover:text-white">
+                    Admin Login
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
           <div>

@@ -10,11 +10,7 @@ const AdminRoute = ({ children }) => {
         return <Loader />;
     }
 
-    if (!user || !user.isAdmin) {
-        return <Navigate to="/admin/login" replace />;
-    }
-
-    return children;
+    return user?.isAdmin ? children : <Navigate to="/admin/login" />;
 };
 
 export default AdminRoute;

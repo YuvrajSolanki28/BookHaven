@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/User");
 const { sendVerificationEmail } = require("../utils/sendemail");
-const passport = require('passport');
+
 const router = express.Router();
 
 // In-memory storage for verification codes (Use Redis or DB for production)
@@ -48,7 +48,6 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-
 // Login
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -58,41 +57,54 @@ router.post("/login", async (req, res) => {
     }
 
     try {
-        // Check if the user exists
         const user = await Users.findOne({ email });
         if (!user) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        // Check if email is verified
-        if (!user.isVerified) {
-            // Optional: Generate and send verification code
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            verificationCodes[email] = code;
-            sendVerificationEmail(email, code);
-
-            // Save token in DB
-            user.verificationToken = code;
+        // Check if verification expired for local users
+        if (user.authProvider === 'local' && user.isVerificationExpired()) {
+            // Reset verification status
+            user.isVerified = false;
+            user.verifiedAt = null;
             await user.save();
 
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            verificationCodes[email] = code;
+
+            try {
+                await sendVerificationEmail(email, code);
+            } catch (err) {
+                console.error("Error sending verification email:", err);
+            }
+
             return res.status(403).json({
-                error: "Email not verified. Verification email sent.",
+                error: "Email verification expired. New verification code sent.",
             });
         }
 
-        // If verified, generate JWT
         const token = jwt.sign(
             { userId: user._id, email: user.email, isAdmin: user.isAdmin },
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
         );
 
-        res.json({ token, isAdmin: user.isAdmin });
+        res.json({ 
+            message: "Login successful", 
+            token, 
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                isAdmin: user.isAdmin,
+                isVerified: user.isVerified
+            }
+        });
 
     } catch (error) {
         console.error("Error in login:", error);
@@ -100,8 +112,11 @@ router.post("/login", async (req, res) => {
     }
 });
 
-// Verify code
 
+
+
+
+// Verify code
 router.post("/verify", async (req, res) => {
     const { email, code } = req.body;
 
@@ -109,24 +124,39 @@ router.post("/verify", async (req, res) => {
         return res.status(400).json({ error: "Email and code are required" });
     }
 
-
     if (verificationCodes[email] === code) {
         try {
-            // Find the user by email
             const user = await Users.findOne({ email });
             if (!user) {
                 return res.status(404).json({ error: "User not found" });
             }
 
-            // Generate new JWT token (optional: update token on verification success)
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            // Set verification with timestamp
+            user.isVerified = true;
+            user.verifiedAt = new Date();
+            
+            const token = jwt.sign(
+                { userId: user._id, email: user.email, isAdmin: user.isAdmin }, 
+                process.env.JWT_SECRET, 
+                { expiresIn: "7d" }
+            );
 
-            // Save the token to the user's record
             user.token = token;
             await user.save();
 
+            delete verificationCodes[email];
 
-            res.json({ message: "Verification successful. Login complete.", token });
+            res.json({ 
+                message: "Verification successful.", 
+                token,
+                user: {
+                    id: user._id,
+                    fullName: user.fullName,
+                    email: user.email,
+                    isAdmin: user.isAdmin,
+                    isVerified: user.isVerified
+                }
+            });
         } catch (error) {
             console.error("Error during verification:", error);
             res.status(500).json({ error: "Server error during verification" });
@@ -135,6 +165,8 @@ router.post("/verify", async (req, res) => {
         return res.status(400).json({ error: "Invalid or expired verification code" });
     }
 });
+
+
 
 //profile
 router.get('/profile/:token', async (req, res) => {
@@ -145,18 +177,23 @@ router.get('/profile/:token', async (req, res) => {
     }
 
     try {
-        // Fetch user by token
-        const userProfile = await Users.findOne({ token });
+        // Decode JWT to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id || decoded.userId;
+        
+        // Fetch user by ID instead of token
+        const userProfile = await Users.findById(userId).select('-password -token');
         if (!userProfile) {
             return res.status(404).send('User not found');
         }
 
-        res.json(userProfile); // Return user data as JSON
+        res.json(userProfile);
     } catch (error) {
         console.error("Error fetching user:", error);
         res.status(500).send('Server error');
     }
 });
+
 
 // Change Password
 router.post("/change-password", async (req, res) => {
@@ -257,86 +294,8 @@ router.put("/update-profile", async (req, res) => {
   }
 });
 
-// Admin Login Route
-router.post("/admin/login", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    try {
-        const user = await Users.findOne({ email });
-        if (!user || !user.isAdmin) {
-            return res.status(401).json({ error: "Invalid admin credentials" });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid admin credentials" });
-        }
-
-        const token = jwt.sign(
-            { userId: user._id, email: user.email, isAdmin: true },
-            process.env.JWT_SECRET,
-            { expiresIn: "24h" }
-        );
-
-        res.json({ 
-            token, 
-            isAdmin: true,
-            user: { id: user._id, fullName: user.fullName, email: user.email }
-        });
-
-    } catch (error) {
-        console.error("Admin login error:", error);
-        res.status(500).json({ error: "Server error during admin login" });
-    }
-});
 
 
-//google login oauth Routes
-router.get("/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/auth/google/failure" }),
-  async (req, res) => {
-    try {
-      const user = req.user;
-
-      // Generate JWT
-      const token = jwt.sign(
-        {
-          id: user._id,
-          email: user.email,
-          name: user.fullName,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
-
-      // 🔹 Save token to user in DB
-      user.token = token;
-      await user.save();
-
-      // Redirect to frontend with token
-      const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${token}`;
-      return res.redirect(redirectUrl);
-    } catch (error) {
-      console.error("Google callback error:", error);
-      res.redirect("/auth/google/failure");
-    }
-  }
-);
-
-
-
-router.get("/google/failure", (req, res) => {
-  res.status(401).send("Google authentication failed");
-});
 
 
 module.exports = router;

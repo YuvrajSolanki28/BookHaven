@@ -1,7 +1,12 @@
 import "./index.css";
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Route, Routes, useLocation, } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import App from "./App";
@@ -18,7 +23,8 @@ import ProfilePage from "./pages/Profile";
 import Loader from "./components/Loader";
 import AdminRoute from "./components/AdmineRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
-import OauthCallback from "./components/OauthCallback";
+import AdminSignup from "./pages/admin/AdminSignup";
+import AuthSuccess from './pages/AuthSuccess';
 
 // Wrapper for Booklist to simulate API call
 const BooklistWrapper = () => {
@@ -40,14 +46,17 @@ const BooklistWrapper = () => {
 // Layout with Navbar & Footer control
 const Layout = ({ children }) => {
   const location = useLocation();
+
   const hideNavbarFooter =
-    location.pathname === "/admin_page" ||
+    location.pathname === "/admin/login" ||
+    location.pathname === "/admin/signup" ||
+    location.pathname === "/admin" ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/verify";
 
-
-  const hideFooter = location.pathname === "/cart" || location.pathname === "/profile";; // lowercase to match route
+  const hideFooter =
+    location.pathname === "/cart" || location.pathname === "/profile"; // ✅ fixed extra semicolon
 
   return (
     <>
@@ -76,12 +85,14 @@ root.render(
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/loader" element={<Loader />} />
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/signup" element={<AdminSignup />} />
               <Route path="/admin" element={
-                <AdminRoute>
-                  <AdminPage />
-                </AdminRoute>
-              } />
-               <Route path="/oauth/callback" element={<OauthCallback />} />
+                  <AdminRoute>
+                    <AdminPage />
+                  </AdminRoute>
+                }
+              />
+              <Route path="/auth/success" element={<AuthSuccess />} />
             </Routes>
           </Layout>
         </CartProvider>

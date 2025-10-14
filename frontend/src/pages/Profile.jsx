@@ -43,7 +43,7 @@ const ProfilePage = () => {
       );
 
       setEditMessage(res.data.message);
-      setEditPassword(""); 
+      setEditPassword("");
     } catch (error) {
       setEditMessage(error.response?.data?.error || "Error updating profile");
     }
@@ -88,15 +88,18 @@ const ProfilePage = () => {
         >
           <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
             <div className="flex items-center mb-6 space-x-4">
-              <div className="w-16 h-16 overflow-hidden rounded-full">
-                {/* <img
-                  src={
-                    user.profileImage ||
-                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                  }
-                  alt="Profile"
-                  className="object-cover w-full h-full"
-                /> */}
+              <div className="w-16 h-16 overflow-hidden bg-gray-200 rounded-full">
+                {user.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full bg-emerald-100">
+                    <UserIcon size={24} className="text-emerald-600" />
+                  </div>
+                )}
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{user.fullName}</h2>
@@ -150,14 +153,17 @@ const ProfilePage = () => {
                     >
                       Edit Profile
                     </button>
-                    <button
-                      onClick={() => setActiveTab("change-password")}
-                      className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-50"
-                    >
-                      Change Password
-                    </button>
+                    {user.authProvider !== 'google' && (
+                      <button
+                        onClick={() => setActiveTab("change-password")}
+                        className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-50"
+                      >
+                        Change Password
+                      </button>
+                    )}
                   </div>
                 )}
+
               </div>
 
               <button
@@ -186,9 +192,35 @@ const ProfilePage = () => {
               <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Profile Overview
               </h2>
-              <p>Welcome back, {user.name} 👋</p>
+              <div className="space-y-4">
+                <p>Welcome back, {user.fullName} 👋</p>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="p-4 rounded-lg bg-gray-50">
+                    <h3 className="font-medium text-gray-900">Account Type</h3>
+                    <p className="text-sm text-gray-600 capitalize">
+                      {user.authProvider || 'Local'} Account
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-gray-50">
+                    <h3 className="font-medium text-gray-900">Email Status</h3>
+                    <p className="text-sm text-gray-600">
+                      {user.isVerified ? '✅ Verified' : '❌ Not Verified'}
+                    </p>
+                  </div>
+
+                  {user.googleId && (
+                    <div className="p-4 rounded-lg bg-gray-50">
+                      <h3 className="font-medium text-gray-900">Google Account</h3>
+                      <p className="text-sm text-gray-600">Connected</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
+
 
           {activeTab === "edit-profile" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
@@ -211,11 +243,17 @@ const ProfilePage = () => {
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
                     className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    disabled={user.authProvider === 'google'}
                   />
+                  {user.authProvider === 'google' && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Email cannot be changed for Google accounts
+                    </p>
+                  )}
                 </div>
 
-                {/* Only show password field if email has changed */}
-                {editEmail !== user.email && (
+                {/* Only show password field for local accounts when email changes */}
+                {editEmail !== user.email && user.authProvider !== 'google' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Confirm Password
@@ -235,10 +273,9 @@ const ProfilePage = () => {
                 </button>
                 {editMessage && <p className="mt-2 text-sm text-green-600">{editMessage}</p>}
               </form>
-
-
             </div>
           )}
+
 
           {activeTab === "change-password" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">

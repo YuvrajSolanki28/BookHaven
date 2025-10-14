@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { UserIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Toaster, toast } from 'react-hot-toast';
 import AuthLayout from '../components/AuthLayout';
-import GoogleLoginButton from '../components/GoogleButton';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +20,8 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const notifySuccess = (message) => toast.success(message);
+  const notifyError = (message) => toast.error(message);
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
@@ -29,56 +33,79 @@ const Signup = () => {
 
   const validate = () => {
     const newErrors = {};
+
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Name is required';
+      newErrors.fullName = 'Full name is required';
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = 'Full name must be at least 2 characters';
     }
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email address is invalid';
+      newErrors.email = 'Please enter a valid email address';
     }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain uppercase, lowercase, and number';
     }
-    if (formData.password !== formData.confirmPassword) {
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+
     if (!formData.termsAccepted) {
       newErrors.terms = 'You must accept the terms and conditions';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      setLoading(true);
-      try {
-        const response = await fetch('http://localhost:8000/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
+    if (!validate()) return;
 
-        const data = await response.json();
+    setLoading(true);
+    setErrors({});
 
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
+    try {
+      const { confirmPassword, termsAccepted, ...submitData } = formData;
+
+      const response = await fetch('http://localhost:8000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        notifySuccess('Account created successfully! Please check your email to verify your account.');
+        setTimeout(() => {
           navigate('/login');
-          // Redirect here if needed
-        } else {
-          setErrors({ api: data.error || 'Something went wrong' });
-        }
-      } catch (error) {
-        setErrors({ api: 'Network error. Please try again.' });
-      } finally {
-        setLoading(false);
+        }, 2000);
+      } else {
+        const errorMessage = data.message || data.error || 'Failed to create account';
+        setErrors({ api: errorMessage });
+        notifyError(errorMessage);
       }
+    } catch (error) {
+      const errorMessage = 'Network error. Please try again.';
+      setErrors({ api: errorMessage });
+      notifyError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
+
+
 
   return (
     <AuthLayout
@@ -90,6 +117,7 @@ const Signup = () => {
       }}
       alternateLinkText="Sign in"
     >
+      <Toaster position="top-right" reverseOrder={false} />
       <motion.form
         onSubmit={handleSubmit}
         className="space-y-5"
@@ -111,9 +139,8 @@ const Signup = () => {
               type="text"
               value={formData.fullName}
               onChange={handleChange}
-              className={`block w-full pl-10 pr-3 py-2 border ${
-                errors.fullName ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+              className={`block w-full pl-10 pr-3 py-2 border ${errors.fullName ? 'border-red-300' : 'border-gray-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
               placeholder="John Doe"
             />
           </div>
@@ -135,9 +162,8 @@ const Signup = () => {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`block w-full pl-10 pr-3 py-2 border ${
-                errors.email ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+              className={`block w-full pl-10 pr-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
               placeholder="you@example.com"
             />
           </div>
@@ -159,9 +185,8 @@ const Signup = () => {
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange}
-              className={`block w-full pl-10 pr-10 py-2 border ${
-                errors.password ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+              className={`block w-full pl-10 pr-10 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
               placeholder="••••••••"
             />
             <button
@@ -194,9 +219,8 @@ const Signup = () => {
               type={showPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`block w-full pl-10 pr-3 py-2 border ${
-                errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+              className={`block w-full pl-10 pr-3 py-2 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
               placeholder="••••••••"
             />
           </div>
@@ -231,8 +255,6 @@ const Signup = () => {
         {errors.terms && <p className="mt-1 text-sm text-red-600">{errors.terms}</p>}
         {errors.api && <p className="text-sm text-center text-red-600">{errors.api}</p>}
 
-        <GoogleLoginButton />
-
         {/* Submit */}
         <div>
           <button
@@ -243,6 +265,22 @@ const Signup = () => {
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </div>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 text-gray-500 bg-white">Or</span>
+            </div>
+          </div>
+          <div className="mt-6">
+            <GoogleLoginButton text="Sign up with Google" />
+          </div>
+        </div>
+
+
       </motion.form>
     </AuthLayout>
   );

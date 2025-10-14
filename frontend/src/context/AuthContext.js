@@ -1,42 +1,57 @@
-import React, { useContext, useState, useEffect } from "react";
-import Loader from "../components/Loader";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 
-const AuthContext = React.createContext(null);
+const AuthContext = createContext();
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetchUserProfile(token);
-    } else {
-      setLoading(false);
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        
+        if (decoded.isAdmin) {
+          setUser({
+            id: decoded.userId,
+            email: decoded.email,
+            fullName: decoded.fullName || 'Admin',
+            isAdmin: true
+          });
+        } else {
+          fetchUserProfile(token, decoded);
+        }
+      } catch (error) {
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     }
+    setLoading(false);
   }, []);
 
-  const fetchUserProfile = async (token) => {
+  const fetchUserProfile = async (token, decoded) => {
     try {
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const response = await fetch(`http://localhost:8000/api/auth/profile/${token}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const response = await fetch(`http://localhost:8000/api/auth/profile/${token}`);
       if (response.ok) {
         const data = await response.json();
         setUser({ ...data, isAdmin: decoded.isAdmin || false });
       } else {
+        localStorage.removeItem("token");
         setUser(null);
       }
     } catch (error) {
+      localStorage.removeItem("token");
       setUser(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -55,4 +70,4 @@ export function AuthProvider({ children }) {
       {loading ? <Loader /> : children}
     </AuthContext.Provider>
   );
-}
+};

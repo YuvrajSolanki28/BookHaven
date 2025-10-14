@@ -4,11 +4,10 @@ import { Toaster, toast } from "react-hot-toast";
 import AuthLayout from '../components/AuthLayout';
 import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
-import GoogleLoginButton from '../components/GoogleButton';
-
+import  GoogleLoginButton  from '../components/GoogleLoginButton';
+import { setAuthData } from '../utils/auth';
 
 const Login = () => {
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +34,8 @@ const Login = () => {
     if (!validate()) return;
 
     setLoading(true);
+    setErrors({});
+
     try {
       const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
@@ -45,17 +46,24 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
+        setAuthData(data.token, data.user);
         notifySuccess('Login successful!');
-        navigate('/');
-        window.location.reload();
+        setTimeout(() => {
+          navigate('/');
+          window.location.reload();
+        }, 1000);
       } else if (response.status === 403) {
+        notifySuccess('Please verify your email to continue');
         setShowVerification(true);
       } else {
-        setErrors({ api: data.error });
+        const errorMessage = data.message || data.error || 'Login failed';
+        setErrors({ api: errorMessage });
+        notifyError(errorMessage);
       }
     } catch (err) {
-      setErrors({ api: 'Network error. Try again.' });
+      const errorMessage = 'Network error. Please try again.';
+      setErrors({ api: errorMessage });
+      notifyError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -63,37 +71,45 @@ const Login = () => {
 
   const handleVerificationSubmit = async (e) => {
     e.preventDefault();
-    if (showVerification) {
-      setLoading(true);
-      try {
-        const response = await fetch(`http://localhost:8000/api/auth/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code: verificationCode }),
-        });
+    if (!verificationCode.trim()) {
+      setErrors({ verification: 'Verification code is required' });
+      return;
+    }
 
-        const data = await response.json();
-        if (response.ok) {
-          notifySuccess("Login successful!");
+    setLoading(true);
+    setErrors({});
 
-          // Store user token & role in localStorage
-          localStorage.setItem("token", data.token);
+    try {
+      const response = await fetch('http://localhost:8000/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: verificationCode }),
+      });
 
-          navigate("/");
+      const data = await response.json();
+
+      if (response.ok) {
+        setAuthData(data.token, data.user);
+        notifySuccess('Email verified successfully!');
+        setTimeout(() => {
+          navigate('/');
           window.location.reload();
-        } else {
-          notifyError(data.message || "Invalid verification code");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        notifyError("An error occurred. Please try again.");
-      } finally {
-        setLoading(false);
+        }, 1000);
+      } else {
+        const errorMessage = data.message || 'Invalid verification code';
+        setErrors({ verification: errorMessage });
+        notifyError(errorMessage);
       }
-    } else {
-      handleSubmit();
+    } catch (error) {
+      const errorMessage = 'Network error. Please try again.';
+      setErrors({ verification: errorMessage });
+      notifyError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
+
+
 
   return (
     <AuthLayout
@@ -128,9 +144,8 @@ const Login = () => {
               type="text"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
-              className={`block w-full px-3 py-2 border ${
-                errors.verification ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+              className={`block w-full px-3 py-2 border ${errors.verification ? 'border-red-300' : 'border-gray-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
               placeholder="Enter 6-digit code"
               maxLength="6"
             />
@@ -175,9 +190,8 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`block w-full pl-10 pr-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+                className={`block w-full pl-10 pr-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
                 placeholder="you@example.com"
               />
             </div>
@@ -197,9 +211,8 @@ const Login = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`block w-full pl-10 pr-10 py-2 border ${
-                  errors.password ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
+                className={`block w-full pl-10 pr-10 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500`}
                 placeholder="••••••••"
               />
               <button
@@ -218,10 +231,12 @@ const Login = () => {
           </div>
 
           {errors.api && <p className="text-sm text-center text-red-600">{errors.api}</p>}
-          <a href="/forgot-password" className="text-sm text-emerald-600 hover:underline">
-            Forgot your password?
-          </a>
-          <GoogleLoginButton />
+
+          <div className="flex items-center justify-between">
+            <a href="/forgot-password" className="text-sm text-emerald-600 hover:underline">
+              Forgot your password?
+            </a>
+          </div>
 
           <div>
             <button
@@ -232,9 +247,24 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 text-gray-500 bg-white">Or continue with</span>
+              </div>
+            </div>
+            <div className="mt-6">
+              <GoogleLoginButton />
+            </div>
+          </div>
+
+
         </motion.form>
       )}
-      {!showVerification}
     </AuthLayout>
   );
 };
