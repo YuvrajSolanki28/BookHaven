@@ -1,18 +1,24 @@
-import React from "react";
-//import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import Hero from "../components/Hero";
 import FeaturedBooks from "../components/FeaturedBooks";
 import Newsletter from "../components/Newsletter";
+import Loader from "../components/Loader";
 
 function Home() {
-  // const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     navigate("/login"); // redirect if not logged in
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    // Simulate loading time for components to load
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-gray-50">

@@ -1,22 +1,22 @@
-import React, { useState } from 'react'
-import { SearchIcon, BookOpenIcon } from 'lucide-react'
+import React, { useState } from 'react';
+import { SearchIcon, BookOpenIcon, EditIcon, TrashIcon } from 'lucide-react';
 
-export function BookTable({ books }) {
-  const [searchTerm, setSearchTerm] = useState('')
+export function BookTable({ books, onEditBook, onDeleteBook }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredBooks = books.filter(
     (book) =>
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   if (books.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         <p>No books added yet. Use the form to add your first book.</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -33,6 +33,7 @@ export function BookTable({ books }) {
           className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         />
       </div>
+      
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -44,16 +45,16 @@ export function BookTable({ books }) {
                 Details
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
+                Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
+                Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredBooks.map((book) => (
-              <tr key={book.id} className="hover:bg-gray-50">
+              <tr key={book._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 flex-shrink-0">
@@ -80,22 +81,26 @@ export function BookTable({ books }) {
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">ISBN: {book.isbn}</div>
                   <div className="text-sm text-gray-500">{book.category}</div>
+                  {book.pages && <div className="text-sm text-gray-500">{book.pages} pages</div>}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      book.stock > 10
-                        ? 'bg-green-100 text-green-800'
-                        : book.stock > 0
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {book.stock} in stock
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${book.price.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => onEditBook(book)}
+                      className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                    >
+                      <EditIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => onDeleteBook(book._id)}
+                      className="text-red-600 hover:text-red-900 p-1 rounded"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -103,5 +108,5 @@ export function BookTable({ books }) {
         </table>
       </div>
     </div>
-  )
+  );
 }

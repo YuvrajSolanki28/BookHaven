@@ -13,6 +13,7 @@ const authRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
 const googleAuthRoutes = require("./routes/googleAuth");
 const booksRoutes = require("./routes/books");
+const ordersRoutes = require("./routes/orders");
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth/admin", adminRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/api/books", booksRoutes);
+app.use("/api/orders", ordersRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);

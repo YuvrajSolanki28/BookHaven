@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     token: { type: String },
     isAdmin: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
-    verifiedAt: { type: Date } // Track when user was verified
+    verifiedAt: { type: Date }
 });
 
 // Check if verification expired (2 weeks)

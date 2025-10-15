@@ -15,7 +15,7 @@ const AdminNavbar = () => {
 
   const navItems = [
     { name: 'Dashboard', icon: BarChart3Icon, path: '/admin' },
-    { name: 'Books', icon: BookOpenIcon, path: '/admin/books' },
+    { name: 'Books', icon: BookOpenIcon, path: '/admin/add-books' },
     { name: 'Users', icon: UsersIcon, path: '/admin/users' },
     { name: 'Settings', icon: SettingsIcon, path: '/admin/settings' }
   ];

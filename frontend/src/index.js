@@ -1,5 +1,5 @@
 import "./index.css";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import {
   BrowserRouter as Router,
@@ -15,7 +15,6 @@ import Footer from "./components/Footer";
 import Bookdetails from "./pages/bookdetails";
 import Booklist from "./pages/booklist";
 import BookCart from "./pages/Cart";
-import AdminPage from "./pages/admin/admin_page";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import EmailVerification from "./pages/EmailVerification";
@@ -23,25 +22,14 @@ import ProfilePage from "./pages/Profile";
 import Loader from "./components/Loader";
 import AdminRoute from "./components/AdmineRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminSignup from "./pages/admin/AdminSignup";
 import AuthSuccess from './pages/AuthSuccess';
+import MyLibrary from "./pages/MyLibrary";
+import AddBooks from "./pages/admin/add_books";
+import Dashboard from "./pages/admin/Dashboard";
+import Users from "./pages/admin/Users";
+import NewReleases from "./pages/NewReleases";
+import Categories from "./pages/Categories";
 
-// Wrapper for Booklist to simulate API call
-const BooklistWrapper = () => {
-  const [books, setBooks] = useState([]);
-
-  useEffect(() => {
-    // Simulating an API call
-    setTimeout(() => {
-      setBooks([
-        { id: 1, title: "Book 1" },
-        { id: 2, title: "Book 2" },
-      ]);
-    }, 1000);
-  }, []);
-
-  return <Booklist books={books} />;
-};
 
 // Layout with Navbar & Footer control
 const Layout = ({ children }) => {
@@ -49,14 +37,15 @@ const Layout = ({ children }) => {
 
   const hideNavbarFooter =
     location.pathname === "/admin/login" ||
-    location.pathname === "/admin/signup" ||
     location.pathname === "/admin" ||
+    location.pathname === "/admin/add-books" ||
+    location.pathname === "/admin/users" ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/verify";
 
   const hideFooter =
-    location.pathname === "/cart" || location.pathname === "/profile"; // ✅ fixed extra semicolon
+    location.pathname === "/cart" || location.pathname === "/profile" || location.pathname === "/mylibrary";
 
   return (
     <>
@@ -76,7 +65,7 @@ root.render(
           <Layout>
             <Routes>
               <Route index element={<App />} />
-              <Route path="/booklist" element={<BooklistWrapper />} />
+              <Route path="/booklist" element={<Booklist />} />
               <Route path="/bookdetails" element={<Bookdetails />} />
               <Route path="/cart" element={<BookCart />} />
               <Route path="/login" element={<Login />} />
@@ -85,14 +74,29 @@ root.render(
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/loader" element={<Loader />} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/signup" element={<AdminSignup />} />
-              <Route path="/admin" element={
+              <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/mylibrary" element={<MyLibrary />} />
+              <Route path="/new-releases" element={<NewReleases />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/admin/add-books" element={
                   <AdminRoute>
-                    <AdminPage />
+                    <AddBooks />
                   </AdminRoute>
                 }
               />
-              <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/admin" element={
+                  <AdminRoute>
+                    <Dashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route path="/admin/users" element={
+                  <AdminRoute>
+                    <Users />
+                  </AdminRoute>
+                }
+              />
+              
             </Routes>
           </Layout>
         </CartProvider>

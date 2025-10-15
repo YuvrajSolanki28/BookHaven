@@ -1,6 +1,8 @@
 const express = require('express');
 const Book = require('../models/Books');
 const jwt = require('jsonwebtoken');
+
+
 const router = express.Router();
 
 // Admin middleware
@@ -64,5 +66,63 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
         res.status(500).json({ error: 'Failed to delete book' });
     }
 });
+
+// Get new releases
+router.get('/new-releases', async (req, res) => {
+    try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const books = await Book.find({
+            createdAt: { $gte: thirtyDaysAgo }
+        }).sort({ createdAt: -1 });
+        
+        res.json(books);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch new releases' });
+    }
+});
+
+// Get all categories with book counts
+router.get('/categories', async (req, res) => {
+    try {
+        const categories = await Book.aggregate([
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    category: "$_id",
+                    count: 1,
+                    _id: 0
+                }
+            },
+            {
+                $sort: { category: 1 }
+            }
+        ]);
+        
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+});
+
+// Get books by category
+router.get('/category/:category', async (req, res) => {
+    try {
+        const books = await Book.find({ 
+            category: req.params.category 
+        }).sort({ createdAt: -1 });
+        
+        res.json(books);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch books by category' });
+    }
+});
+
 
 module.exports = router;

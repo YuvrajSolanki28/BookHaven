@@ -1,16 +1,47 @@
 import React, { useState, useEffect } from "react";
-import {  ShoppingCart, Menu, X, CircleUserRound } from "lucide-react";
+import { ShoppingCart, Menu, X, CircleUserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const { user } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
+    updateCartCount();
+  }, []);
+
+  // Update cart count from localStorage
+  const updateCartCount = () => {
+    const savedCart = localStorage.getItem('bookCart');
+    if (savedCart) {
+      const cart = JSON.parse(savedCart);
+      setCartCount(cart.length);
+    } else {
+      setCartCount(0);
+    }
+  };
+
+  // Listen for cart changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      updateCartCount();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom cart update events
+    window.addEventListener('cartUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -18,9 +49,6 @@ const Navbar = () => {
     setIsAuthenticated(false);
     navigate('/');
   };
-
-
- 
 
   return (
     <nav className="fixed top-0 z-50 w-full bg-white shadow-sm">
@@ -57,15 +85,25 @@ const Navbar = () => {
             <a href="/new-releases" className="text-gray-700 hover:text-gray-900">
               New Releases
             </a>
+            {user && (
+              <a href="/mylibrary" className="text-gray-700 hover:text-gray-900">
+                My Library
+              </a>
+            )}
           </div>
 
           {/* Cart, Login/Profile, and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate("/cart")}
-              className="text-gray-700 hover:text-gray-900"
+              className="relative text-gray-700 hover:text-gray-900"
             >
               <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
@@ -84,8 +122,7 @@ const Navbar = () => {
                 Login
               </button>
             )}
-            
-            
+
             <button
               className="text-gray-700 md:hidden hover:text-gray-900"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
