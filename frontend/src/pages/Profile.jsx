@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { UserIcon, ShoppingBagIcon, HeartIcon, CreditCardIcon, SettingsIcon, LogOutIcon, ChevronDownIcon, } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import { MoonIcon, SunIcon } from "lucide-react";
 import Loader from "../components/Loader";
 import axios from "axios";
 
@@ -11,16 +13,16 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
   const { user, logout, loading } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [editName, setEditName] = useState(user.fullName || "");
-  const [editEmail, setEditEmail] = useState(user.email || "");
+  const [editName, setEditName] = useState(user?.fullName || "");
+  const [editEmail, setEditEmail] = useState(user?.email || "");
   const [editMessage, setEditMessage] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const navigate = useNavigate();
-
 
   if (loading) {
     return <Loader />;
@@ -74,10 +76,8 @@ const ProfilePage = () => {
     }
   };
 
-
-
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
       <div className="px-4 py-20 pb-16 mx-auto lg:grid lg:grid-cols-4 lg:gap-x-8 max-w-7xl sm:px-6 lg:px-8">
         <motion.div
@@ -86,9 +86,9 @@ const ProfilePage = () => {
           transition={{ duration: 0.5 }}
           className="mb-8 lg:mb-0"
         >
-          <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
+          <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
             <div className="flex items-center mb-6 space-x-4">
-              <div className="w-16 h-16 overflow-hidden bg-gray-200 rounded-full">
+              <div className="w-16 h-16 overflow-hidden bg-gray-200 rounded-full dark:bg-gray-700">
                 {user.profilePicture ? (
                   <img
                     src={user.profilePicture}
@@ -96,14 +96,14 @@ const ProfilePage = () => {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="flex items-center justify-center w-full h-full bg-emerald-100">
-                    <UserIcon size={24} className="text-emerald-600" />
+                  <div className="flex items-center justify-center w-full h-full bg-emerald-100 dark:bg-emerald-800">
+                    <UserIcon size={24} className="text-emerald-600 dark:text-emerald-400" />
                   </div>
                 )}
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">{user.fullName}</h2>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{user.fullName}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
 
@@ -118,8 +118,8 @@ const ProfilePage = () => {
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
                   className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${activeTab === item.key
-                    ? "bg-indigo-50 text-indigo-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                 >
                   <item.icon size={18} className="mr-3" />
@@ -132,8 +132,8 @@ const ProfilePage = () => {
                 <button
                   onClick={() => setSettingsDropdownOpen(!settingsDropdownOpen)}
                   className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${activeTab === "settings"
-                    ? "bg-indigo-50 text-indigo-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                 >
                   <SettingsIcon size={18} className="mr-3" />
@@ -149,21 +149,26 @@ const ProfilePage = () => {
                   <div className="mt-1 ml-6 space-y-1">
                     <button
                       onClick={() => setActiveTab("edit-profile")}
-                      className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-50"
+                      className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Edit Profile
                     </button>
                     {user.authProvider !== 'google' && (
                       <button
                         onClick={() => setActiveTab("change-password")}
-                        className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-50"
+                        className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         Change Password
                       </button>
                     )}
+                    <button
+                      onClick={() => setActiveTab("theme-settings")}
+                      className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      Theme Settings
+                    </button>
                   </div>
                 )}
-
               </div>
 
               <button
@@ -171,7 +176,7 @@ const ProfilePage = () => {
                   logout();
                   navigate("/login");
                 }}
-                className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-md hover:bg-red-50"
+                className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-md dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900"
               >
                 <LogOutIcon size={18} className="mr-3" />
                 <span>Log Out</span>
@@ -188,32 +193,32 @@ const ProfilePage = () => {
           className="lg:col-span-3"
         >
           {activeTab === "profile" && (
-            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Profile Overview
               </h2>
               <div className="space-y-4">
-                <p>Welcome back, {user.fullName} 👋</p>
+                <p className="text-gray-700 dark:text-gray-300">Welcome back, {user.fullName} 👋</p>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="p-4 rounded-lg bg-gray-50">
-                    <h3 className="font-medium text-gray-900">Account Type</h3>
-                    <p className="text-sm text-gray-600 capitalize">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <h3 className="font-medium text-gray-900 dark:text-white">Account Type</h3>
+                    <p className="text-sm text-gray-600 capitalize dark:text-gray-400">
                       {user.authProvider || 'Local'} Account
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-lg bg-gray-50">
-                    <h3 className="font-medium text-gray-900">Email Status</h3>
-                    <p className="text-sm text-gray-600">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <h3 className="font-medium text-gray-900 dark:text-white">Email Status</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {user.isVerified ? '✅ Verified' : '❌ Not Verified'}
                     </p>
                   </div>
 
                   {user.googleId && (
-                    <div className="p-4 rounded-lg bg-gray-50">
-                      <h3 className="font-medium text-gray-900">Google Account</h3>
-                      <p className="text-sm text-gray-600">Connected</p>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                      <h3 className="font-medium text-gray-900 dark:text-white">Google Account</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Connected</p>
                     </div>
                   )}
                 </div>
@@ -221,48 +226,46 @@ const ProfilePage = () => {
             </div>
           )}
 
-
           {activeTab === "edit-profile" && (
-            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">Edit Profile</h2>
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
               <form className="space-y-4" onSubmit={handleEditProfile}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                   <input
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                     disabled={user.authProvider === 'google'}
                   />
                   {user.authProvider === 'google' && (
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Email cannot be changed for Google accounts
                     </p>
                   )}
                 </div>
 
-                {/* Only show password field for local accounts when email changes */}
                 {editEmail !== user.email && user.authProvider !== 'google' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Confirm Password
                     </label>
                     <input
                       type="password"
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
-                      className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                       required
                     />
                   </div>
@@ -271,51 +274,50 @@ const ProfilePage = () => {
                 <button className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                   Save Changes
                 </button>
-                {editMessage && <p className="mt-2 text-sm text-green-600">{editMessage}</p>}
+                {editMessage && <p className="mt-2 text-sm text-green-600 dark:text-green-400">{editMessage}</p>}
               </form>
             </div>
           )}
 
-
           {activeTab === "change-password" && (
-            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Change Password
               </h2>
               <form className="space-y-4" onSubmit={handleChangePassword}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Current Password
                   </label>
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     New Password
                   </label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Confirm New Password
                   </label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />
                 </div>
@@ -324,8 +326,54 @@ const ProfilePage = () => {
                 </button>
               </form>
 
-              {message && <p className="mt-2 text-sm text-red-500">{message}</p>}
+              {message && <p className="mt-2 text-sm text-red-500 dark:text-red-400">{message}</p>}
+            </div>
+          )}
 
+          {activeTab === "theme-settings" && (
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+                Theme Settings
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                  <div className="flex items-center">
+                    <SunIcon className="w-5 h-5 mr-3 text-yellow-600" />
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Light Mode</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Use light theme</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => !isDark || toggleTheme()}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!isDark
+                        ? 'bg-yellow-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                      }`}
+                  >
+                    {!isDark ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                  <div className="flex items-center">
+                    <MoonIcon className="w-5 h-5 mr-3 text-blue-600" />
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Dark Mode</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Use dark theme</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => isDark || toggleTheme()}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${isDark
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                      }`}
+                  >
+                    {isDark ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </motion.div>

@@ -78,19 +78,19 @@ const BookCart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-24">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <ShoppingCartIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+      <div className="min-h-screen py-24 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl px-4 mx-auto">
+          <div className="p-8 text-center bg-white rounded-lg shadow">
+            <ShoppingCartIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="mb-2 text-2xl font-semibold text-gray-900">
               Your cart is empty
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6 text-gray-600">
               Start adding some books to your cart!
             </p>
             <button
               onClick={() => navigate('/booklist')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Browse Books
             </button>
@@ -101,15 +101,15 @@ const BookCart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-24">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen py-24 bg-gray-50">
+      <div className="max-w-4xl px-4 mx-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <button
               onClick={() => navigate('/booklist')}
-              className="flex items-center text-blue-600 hover:text-blue-800 mr-4"
+              className="flex items-center mr-4 text-blue-600 hover:text-blue-800"
             >
               <ArrowLeftIcon className="w-4 h-4 mr-2" />
               Continue Shopping
@@ -128,15 +128,15 @@ const BookCart = () => {
                 <div key={book._id} className="flex items-center gap-4 py-4 border-b last:border-b-0">
 
                   {/* Book Image */}
-                  <div className="w-20 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                  <div className="flex-shrink-0 w-20 h-24 overflow-hidden bg-gray-200 rounded">
                     {book.imageUrl ? (
                       <img
                         src={book.imageUrl}
                         alt={book.title}
-                        className="w-full h-full object-cover"
+                        className="object-cover w-full h-full"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="flex items-center justify-center w-full h-full text-gray-400">
                         <ShoppingCartIcon className="w-8 h-8" />
                       </div>
                     )}
@@ -150,7 +150,7 @@ const BookCart = () => {
                     <p className="text-sm text-gray-600">by {book.author}</p>
                     <p className="text-sm text-gray-500">{book.category}</p>
                     {book.isDigital && (
-                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mt-1">
+                      <span className="inline-block px-2 py-1 mt-1 text-xs text-blue-800 bg-blue-100 rounded">
                         Digital Book
                       </span>
                     )}
@@ -166,7 +166,7 @@ const BookCart = () => {
                   {/* Remove Button */}
                   <button
                     onClick={() => removeFromCart(book._id)}
-                    className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-red-500"
+                    className="p-2 text-gray-400 rounded-full hover:bg-gray-100 hover:text-red-500"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -176,8 +176,8 @@ const BookCart = () => {
           </div>
 
           {/* Cart Summary */}
-          <div className="border-t bg-gray-50 p-6">
-            <div className="flex justify-between items-center mb-4">
+          <div className="p-6 border-t bg-gray-50">
+            <div className="flex items-center justify-between mb-4">
               <span className="text-lg font-semibold text-gray-900">Total</span>
               <span className="text-2xl font-bold text-green-600">
                 ${totalPrice.toFixed(2)}
@@ -187,14 +187,14 @@ const BookCart = () => {
             <div className="flex gap-4">
               <button
                 onClick={clearCart}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50"
+                className="flex-1 px-6 py-3 font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Clear Cart
               </button>
               <button
                 onClick={handlePurchaseClick}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400"
+                className="flex-1 px-6 py-3 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
               >
                 {loading ? 'Processing...' : `Purchase All - $${totalPrice.toFixed(2)}`}
               </button>

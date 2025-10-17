@@ -1,45 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { ShoppingCartIcon, DownloadIcon, ArrowLeftIcon } from 'lucide-react';
+import Loader from '../components/Loader';
 
 const BookDetailsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [book, setBook] = useState(location.state?.book || null);
+
+  const [book] = useState(location.state?.book || null);
   const [loading, setLoading] = useState(!book);
   const [purchased, setPurchased] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    if (!book) {
-      // If no book data, redirect back to booklist
-      navigate('/booklist');
-    } else {
-      checkIfPurchased();
+  // ✅ Fix: Wrap in useCallback to avoid ESLint warning
+  const checkIfPurchased = useCallback(async () => {
+    if (!user || !book) {
+      setLoading(false);
+      return;
     }
-  }, [book, navigate]);
 
-  const checkIfPurchased = async () => {
-    if (!user || !book) return;
-    
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:8000/api/orders/my-orders', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
-      const hasPurchased = response.data.some(order => 
+
+      const hasPurchased = response.data.some(order =>
         order.books.some(orderBook => orderBook.bookId === book._id)
       );
       setPurchased(hasPurchased);
     } catch (error) {
-      console.error('Error checking purchase status');
+      console.error('Error checking purchase status:', error);
+      toast.error('Failed to check purchase status');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [user, book]);
+
+  useEffect(() => {
+    if (!book) {
+      navigate('/booklist');
+    } else {
+      checkIfPurchased();
+    }
+  }, [book, navigate, checkIfPurchased]); // ✅ No ESLint warning now
 
   const handlePurchase = async () => {
     if (!user) {
@@ -48,47 +57,67 @@ const BookDetailsPage = () => {
     }
 
     try {
+      setActionLoading(true);
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8000/api/orders/create', 
-        { bookIds: [book._id] }, 
+
+      await axios.post(
+        'http://localhost:8000/api/orders/create',
+        { bookIds: [book._id] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       toast.success('Purchase successful!');
       setPurchased(true);
     } catch (error) {
-      toast.error('Purchase failed');
+      console.error('Purchase failed:', error);
+      toast.error('Purchase failed. Please try again.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleDownload = async () => {
     try {
+      setActionLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/api/orders/download/${book._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+
+      const response = await axios.get(
+        `http://localhost:8000/api/orders/download/${book._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob', // Important for file downloads
+        }
+      );
+
+      // Create a blob link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
-      link.href = response.data.downloadUrl;
-      link.download = `${book.title}.pdf`;
+      link.href = url;
+      link.setAttribute('download', `${book.title || 'book'}.pdf`);
+      document.body.appendChild(link);
       link.click();
-      
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
       toast.success('Download started');
     } catch (error) {
+      console.error('Download failed:', error);
       toast.error('Download failed');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   if (loading || !book) {
-    return <div className="flex justify-center py-20">Loading...</div>;
+    return <Loader />;
   }
 
   return (
-    <div className="w-full bg-gray-50 min-h-screen">
+    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="px-4 py-24 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        
+
         {/* Back Button */}
-        <button 
+        <button
           onClick={() => navigate('/booklist')}
           className="flex items-center mb-6 text-blue-600 hover:text-blue-800"
         >
@@ -97,7 +126,6 @@ const BookDetailsPage = () => {
         </button>
 
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
-          
           {/* Left column - Book Image */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -105,15 +133,15 @@ const BookDetailsPage = () => {
             transition={{ duration: 0.5 }}
             className="mb-8 lg:mb-0"
           >
-            <div className="aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden">
+            <div className="overflow-hidden bg-gray-200 rounded-lg aspect-w-1 aspect-h-1">
               {book.imageUrl ? (
-                <img 
-                  src={book.imageUrl} 
+                <img
+                  src={book.imageUrl}
                   alt={book.title}
-                  className="w-full h-96 object-cover rounded-lg"
+                  className="object-cover w-full rounded-lg h-96"
                 />
               ) : (
-                <div className="flex items-center justify-center h-96 bg-gray-200 rounded-lg">
+                <div className="flex items-center justify-center bg-gray-200 rounded-lg h-96">
                   <span className="text-gray-500">No Image Available</span>
                 </div>
               )}
@@ -128,14 +156,14 @@ const BookDetailsPage = () => {
             className="space-y-6"
           >
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
-              <p className="text-xl text-gray-600 mt-2">by {book.author}</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{book.title}</h1>
+              <p className="mt-2 text-xl text-gray-600 dark:text-gray-300">by {book.author}</p>
             </div>
 
             <div className="flex items-center space-x-4">
               <span className="text-3xl font-bold text-green-600">${book.price}</span>
               {book.isDigital && (
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                <span className="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
                   Digital Book
                 </span>
               )}
@@ -144,14 +172,18 @@ const BookDetailsPage = () => {
             {/* Book Details */}
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">Category:</span>
-                  <span className="ml-2 text-gray-600">{book.category}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">ISBN:</span>
-                  <span className="ml-2 text-gray-600">{book.isbn}</span>
-                </div>
+                {book.category && (
+                  <div>
+                    <span className="font-medium text-gray-700">Category:</span>
+                    <span className="ml-2 text-gray-600">{book.category}</span>
+                  </div>
+                )}
+                {book.isbn && (
+                  <div>
+                    <span className="font-medium text-gray-700">ISBN:</span>
+                    <span className="ml-2 text-gray-600">{book.isbn}</span>
+                  </div>
+                )}
                 {book.pages && (
                   <div>
                     <span className="font-medium text-gray-700">Pages:</span>
@@ -184,27 +216,29 @@ const BookDetailsPage = () => {
             {/* Action Buttons */}
             <div className="space-y-4">
               {!user ? (
-                <button 
+                <button
                   onClick={() => navigate('/login')}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                  className="flex items-center justify-center w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   Login to Purchase
                 </button>
               ) : purchased ? (
-                <button 
+                <button
                   onClick={handleDownload}
-                  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 flex items-center justify-center"
+                  disabled={actionLoading}
+                  className="flex items-center justify-center w-full px-6 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
                 >
                   <DownloadIcon className="w-5 h-5 mr-2" />
-                  Download PDF
+                  {actionLoading ? 'Downloading...' : 'Download PDF'}
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={handlePurchase}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                  disabled={actionLoading}
+                  className="flex items-center justify-center w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   <ShoppingCartIcon className="w-5 h-5 mr-2" />
-                  Buy Now - ${book.price}
+                  {actionLoading ? 'Processing...' : `Buy Now - $${book.price}`}
                 </button>
               )}
             </div>
@@ -219,9 +253,9 @@ const BookDetailsPage = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mt-16"
           >
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed">{book.description}</p>
+            <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
+              <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Description</h2>
+              <p className="leading-relaxed text-gray-700 dark:text-gray-300">{book.description}</p>
             </div>
           </motion.div>
         )}

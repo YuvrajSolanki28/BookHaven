@@ -63,7 +63,7 @@ function NewReleases() {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           
@@ -76,23 +76,23 @@ function NewReleases() {
           >
             <div className="flex items-center justify-center mb-4">
               <TrendingUpIcon className="w-8 h-8 text-blue-600 mr-3" />
-              <h1 className="text-4xl font-bold text-gray-900">New Releases</h1>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">New Releases</h1>
             </div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Discover the latest books added to our collection. Fresh stories, new adventures, and cutting-edge knowledge await you.
             </p>
           </motion.div>
 
           {/* Stats */}
           <motion.div
-            className="bg-white rounded-lg shadow p-6 mb-8"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="flex items-center justify-center">
               <CalendarIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span className="text-gray-600">
+              <span className="text-gray-600 dark:text-gray-300">
                 {books.length} new books added in the last 30 days
               </span>
             </div>
@@ -146,8 +146,8 @@ function NewReleases() {
               transition={{ duration: 0.5 }}
             >
               <TrendingUpIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No New Releases</h3>
-              <p className="text-gray-600 mb-6">Check back soon for the latest books!</p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No New Releases</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">Check back soon for the latest books!</p>
               <button
                 onClick={() => navigate('/booklist')}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"

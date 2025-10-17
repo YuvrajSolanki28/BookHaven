@@ -98,13 +98,13 @@ function Booklist() {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:bg-gray-900">
       <main className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
 
           {/* Search and filter section */}
           <motion.div
-            className="p-4 mb-8 bg-white rounded-lg shadow-sm"
+            className="p-4 mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:bg-gray-800"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -135,7 +135,7 @@ function Booklist() {
 
           {/* Results count */}
           <motion.div
-            className="mb-4 text-gray-600"
+            className="mb-4 text-gray-600 dark:text-gray-300"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -169,7 +169,7 @@ function Booklist() {
                       e.stopPropagation();
                       addToCart(book);
                     }}
-                    className="absolute bottom-4 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                    className="absolute px-3 py-1 text-sm text-white bg-blue-600 rounded bottom-4 right-4 hover:bg-blue-700"
                   >
                     Add to Cart
                   </button>
@@ -178,7 +178,7 @@ function Booklist() {
             </motion.div>
           ) : (
             <motion.div
-              className="py-10 text-center text-gray-500"
+              className="py-10 text-center text-gray-500 dark:text-gray-400"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}

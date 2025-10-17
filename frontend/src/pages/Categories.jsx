@@ -75,7 +75,7 @@ function Categories() {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           
@@ -88,9 +88,9 @@ function Categories() {
           >
             <div className="flex items-center justify-center mb-4">
               <GridIcon className="w-8 h-8 text-purple-600 mr-3" />
-              <h1 className="text-4xl font-bold text-gray-900">Book Categories</h1>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Book Categories</h1>
             </div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Explore books by category. Find your favorite genres and discover new ones.
             </p>
           </motion.div>
@@ -109,7 +109,7 @@ function Categories() {
                 className={`p-4 rounded-lg text-center transition-all ${
                   selectedCategory === cat.category
                     ? 'bg-purple-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-purple-50 shadow'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700 shadow'
                 }`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -130,7 +130,7 @@ function Categories() {
               transition={{ duration: 0.5 }}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {selectedCategory} ({books.length})
                 </h2>
               </div>
@@ -165,8 +165,8 @@ function Categories() {
               ) : (
                 <div className="text-center py-16">
                   <BookOpenIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No Books Found</h3>
-                  <p className="text-gray-600">No books available in this category yet.</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Books Found</h3>
+                  <p className="text-gray-600 dark:text-gray-300">No books available in this category yet.</p>
                 </div>
               )}
             </motion.div>

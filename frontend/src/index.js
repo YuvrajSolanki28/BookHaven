@@ -1,14 +1,10 @@
 import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import App from "./App";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -47,12 +43,14 @@ const Layout = ({ children }) => {
   const hideFooter =
     location.pathname === "/cart" || location.pathname === "/profile" || location.pathname === "/mylibrary";
 
+    const isAdminPage = location.pathname.startsWith("/admin");
+
   return (
-    <>
+    <div className={isAdminPage ? "" : ""}>
       {!hideNavbarFooter && <Navbar />}
       {children}
       {!hideNavbarFooter && !hideFooter && <Footer />}
-    </>
+    </div>
   );
 };
 
@@ -62,43 +60,45 @@ root.render(
     <Router>
       <AuthProvider>
         <CartProvider>
-          <Layout>
-            <Routes>
-              <Route index element={<App />} />
-              <Route path="/booklist" element={<Booklist />} />
-              <Route path="/bookdetails" element={<Bookdetails />} />
-              <Route path="/cart" element={<BookCart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/verify" element={<EmailVerification />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/loader" element={<Loader />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/auth/success" element={<AuthSuccess />} />
-              <Route path="/mylibrary" element={<MyLibrary />} />
-              <Route path="/new-releases" element={<NewReleases />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/admin/add-books" element={
+          <ThemeProvider>
+            <Layout>
+              <Routes>
+                <Route index element={<App />} />
+                <Route path="/booklist" element={<Booklist />} />
+                <Route path="/bookdetails" element={<Bookdetails />} />
+                <Route path="/cart" element={<BookCart />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/verify" element={<EmailVerification />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/loader" element={<Loader />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/auth/success" element={<AuthSuccess />} />
+                <Route path="/mylibrary" element={<MyLibrary />} />
+                <Route path="/new-releases" element={<NewReleases />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/admin/add-books" element={
                   <AdminRoute>
                     <AddBooks />
                   </AdminRoute>
                 }
-              />
-              <Route path="/admin" element={
+                />
+                <Route path="/admin" element={
                   <AdminRoute>
                     <Dashboard />
                   </AdminRoute>
                 }
-              />
-              <Route path="/admin/users" element={
+                />
+                <Route path="/admin/users" element={
                   <AdminRoute>
                     <Users />
                   </AdminRoute>
                 }
-              />
-              
-            </Routes>
-          </Layout>
+                />
+
+              </Routes>
+            </Layout>
+          </ThemeProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

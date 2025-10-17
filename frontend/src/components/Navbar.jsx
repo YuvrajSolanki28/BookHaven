@@ -51,7 +51,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white shadow-sm">
+    <nav className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand/Logo */}
@@ -68,25 +68,25 @@ const Navbar = () => {
                 e.target.nextSibling.style.display = 'block';
               }}
             />
-            <span className="hidden text-xl font-bold text-gray-900">BookHaven</span>
+            <span className="hidden text-xl font-bold text-gray-900 dark:text-white">BookHaven</span>
           </div>
 
           {/* Desktop Navigation */}
           <div className="items-center hidden space-x-8 md:flex">
-            <a href="/" className="text-gray-700 hover:text-gray-900">
+            <a href="/" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Home
             </a>
-            <a href="/booklist" className="text-gray-700 hover:text-gray-900">
+            <a href="/booklist" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Books
             </a>
-            <a href="/categories" className="text-gray-700 hover:text-gray-900">
+            <a href="/categories" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Categories
             </a>
-            <a href="/new-releases" className="text-gray-700 hover:text-gray-900">
+            <a href="/new-releases" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               New Releases
             </a>
             {user && (
-              <a href="/mylibrary" className="text-gray-700 hover:text-gray-900">
+              <a href="/mylibrary" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 My Library
               </a>
             )}
@@ -96,7 +96,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate("/cart")}
-              className="relative text-gray-700 hover:text-gray-900"
+              className="relative text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             >
               <ShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
@@ -109,7 +109,7 @@ const Navbar = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => navigate("/profile")}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
                   <CircleUserRound className="w-6 h-6" />
                 </button>
@@ -117,14 +117,14 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className="text-gray-700 hover:text-gray-900"
+                className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 Login
               </button>
             )}
 
             <button
-              className="text-gray-700 md:hidden hover:text-gray-900"
+              className="text-gray-700 md:hidden hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -136,18 +136,18 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="/" className="block px-3 py-2 text-gray-700 hover:text-gray-900">
+              <a href="/" className="block px-3 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Home
               </a>
-              <a href="/booklist" className="block px-3 py-2 text-gray-700 hover:text-gray-900">
+              <a href="/booklist" className="block px-3 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Books
               </a>
-              <a href="/categories" className="block px-3 py-2 text-gray-700 hover:text-gray-900">
+              <a href="/categories" className="block px-3 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Categories
               </a>
               <a
                 href="/new-releases"
-                className="block px-3 py-2 text-gray-700 hover:text-gray-900"
+                className="block px-3 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 New Releases
               </a>
@@ -155,13 +155,13 @@ const Navbar = () => {
                 <>
                   <button
                     onClick={() => navigate("/profile")}
-                    className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900"
+                    className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   >
                     Profile
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900"
+                    className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   >
                     Logout
                   </button>
@@ -169,7 +169,7 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={() => navigate("/login")}
-                  className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900"
+                  className="block w-full px-3 py-2 text-left text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
                   Login
                 </button>
