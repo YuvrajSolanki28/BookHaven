@@ -25,8 +25,8 @@ const books = [
 ];
 const FeaturedBooks = () => {
   return (
-    <section className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 bg-white dark:bg-gray-800">
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <motion.h2
           initial={{
             opacity: 0,
@@ -39,11 +39,11 @@ const FeaturedBooks = () => {
           viewport={{
             once: true,
           }}
-          className="text-3xl font-bold text-gray-900 text-center mb-12"
+          className="mb-12 text-3xl font-bold text-center text-gray-900 dark:text-white"
         >
           Featured Books
         </motion.h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book, index) => (
             <motion.div
               key={book.id}
@@ -64,18 +64,18 @@ const FeaturedBooks = () => {
               whileHover={{
                 scale: 1.05,
               }}
-              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              className="overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-700"
             >
               <img
                 src={book.image}
                 alt={book.title}
-                className="w-full h-64 object-cover"
+                className="object-cover w-full h-64"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {book.title}
                 </h3>
-                <p className="text-gray-600">{book.author}</p>
+                <p className="text-gray-600 dark:text-gray-300">{book.author}</p>
               </div>
             </motion.div>
           ))}

@@ -65,7 +65,7 @@ root.render(
               <Routes>
                 <Route index element={<App />} />
                 <Route path="/booklist" element={<Booklist />} />
-                <Route path="/bookdetails" element={<Bookdetails />} />
+                <Route path="/book/:id" element={<Bookdetails />} />
                 <Route path="/cart" element={<BookCart />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />

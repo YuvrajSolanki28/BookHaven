@@ -1,11 +1,20 @@
 // src/pages/ProfilePage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { UserIcon, ShoppingBagIcon, HeartIcon, CreditCardIcon, SettingsIcon, LogOutIcon, ChevronDownIcon, } from "lucide-react";
+import {
+  UserIcon,
+  ShoppingBagIcon,
+  HeartIcon,
+  CreditCardIcon,
+  SettingsIcon,
+  LogOutIcon,
+  ChevronDownIcon,
+  MoonIcon,
+  SunIcon,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { MoonIcon, SunIcon } from "lucide-react";
 import Loader from "../components/Loader";
 import axios from "axios";
 
@@ -14,28 +23,59 @@ const ProfilePage = () => {
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
   const { user, logout, loading } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [editName, setEditName] = useState(user?.fullName || "");
-  const [editEmail, setEditEmail] = useState(user?.email || "");
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [editMessage, setEditMessage] = useState("");
   const [editPassword, setEditPassword] = useState("");
+  const [wishlist, setWishlist] = useState([]);
+
   const navigate = useNavigate();
 
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (!user) {
+  // Redirect unauthorized users
+  // Redirect unauthorized users
+useEffect(() => {
+  if (!loading && !user && !localStorage.getItem("token")) {
     navigate("/login");
-    return null;
   }
+}, [loading, user, navigate]);
 
+
+  // Initialize edit fields
+  useEffect(() => {
+    if (user) {
+      setEditName(user.fullName || "");
+      setEditEmail(user.email || "");
+    }
+  }, [user]);
+
+  // Fetch wishlist
+  const fetchWishlist = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:8000/api/wishlist", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWishlist(response.data);
+    } catch (error) {
+      console.error("Failed to fetch wishlist:", error);
+      setWishlist([]);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "wishlist" && user) {
+      fetchWishlist();
+    }
+  }, [activeTab, user]);
+
+  // Edit profile
   const handleEditProfile = async (e) => {
     e.preventDefault();
-
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
@@ -43,22 +83,20 @@ const ProfilePage = () => {
         { fullName: editName, email: editEmail, password: editPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setEditMessage(res.data.message);
+      setEditMessage(res.data.message || "Profile updated successfully!");
       setEditPassword("");
     } catch (error) {
       setEditMessage(error.response?.data?.error || "Error updating profile");
     }
   };
 
+  // Change password
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
     if (newPassword !== confirmPassword) {
       setMessage("New passwords do not match");
       return;
     }
-
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
@@ -66,8 +104,7 @@ const ProfilePage = () => {
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setMessage(res.data.message);
+      setMessage(res.data.message || "Password updated successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -76,10 +113,14 @@ const ProfilePage = () => {
     }
   };
 
+  if (loading || !user) {
+    return <Loader />;
+  }
+
   return (
     <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar */}
       <div className="px-4 py-20 pb-16 mx-auto lg:grid lg:grid-cols-4 lg:gap-x-8 max-w-7xl sm:px-6 lg:px-8">
+        {/* Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -87,8 +128,9 @@ const ProfilePage = () => {
           className="mb-8 lg:mb-0"
         >
           <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+            {/* User Info */}
             <div className="flex items-center mb-6 space-x-4">
-              <div className="w-16 h-16 overflow-hidden bg-gray-200 rounded-full dark:bg-gray-700">
+              <div className="flex-shrink-0 w-16 h-16 overflow-hidden bg-gray-200 rounded-full dark:bg-gray-700">
                 {user.profilePicture ? (
                   <img
                     src={user.profilePicture}
@@ -102,11 +144,14 @@ const ProfilePage = () => {
                 )}
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{user.fullName}</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {user.fullName}
+                </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
 
+            {/* Sidebar Nav */}
             <nav className="space-y-1">
               {[
                 { key: "profile", label: "Profile Overview", icon: UserIcon },
@@ -117,31 +162,30 @@ const ProfilePage = () => {
                 <button
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
-                  className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${activeTab === item.key
-                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
+                  className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${
+                    activeTab === item.key
+                      ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
                 >
                   <item.icon size={18} className="mr-3" />
                   <span>{item.label}</span>
                 </button>
               ))}
 
-              {/* Settings */}
+              {/* Settings dropdown */}
               <div>
                 <button
                   onClick={() => setSettingsDropdownOpen(!settingsDropdownOpen)}
-                  className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${activeTab === "settings"
-                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
+                  className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   <SettingsIcon size={18} className="mr-3" />
                   <span>Account Settings</span>
                   <ChevronDownIcon
                     size={16}
-                    className={`ml-auto transition-transform duration-200 ${settingsDropdownOpen ? "rotate-180" : ""
-                      }`}
+                    className={`ml-auto transition-transform duration-200 ${
+                      settingsDropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
@@ -153,7 +197,7 @@ const ProfilePage = () => {
                     >
                       Edit Profile
                     </button>
-                    {user.authProvider !== 'google' && (
+                    {user.authProvider !== "google" && (
                       <button
                         onClick={() => setActiveTab("change-password")}
                         className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -171,6 +215,7 @@ const ProfilePage = () => {
                 )}
               </div>
 
+              {/* Logout */}
               <button
                 onClick={() => {
                   logout();
@@ -185,78 +230,61 @@ const ProfilePage = () => {
           </div>
         </motion.div>
 
-        {/* Main content */}
+        {/* Main Content */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:col-span-3"
         >
+          {/* Profile Overview */}
           {activeTab === "profile" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
               <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Profile Overview
               </h2>
-              <div className="space-y-4">
-                <p className="text-gray-700 dark:text-gray-300">Welcome back, {user.fullName} 👋</p>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Account Type</h3>
-                    <p className="text-sm text-gray-600 capitalize dark:text-gray-400">
-                      {user.authProvider || 'Local'} Account
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Email Status</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {user.isVerified ? '✅ Verified' : '❌ Not Verified'}
-                    </p>
-                  </div>
-
-                  {user.googleId && (
-                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                      <h3 className="font-medium text-gray-900 dark:text-white">Google Account</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Connected</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <p className="text-gray-700 dark:text-gray-300">
+                Welcome back, {user.fullName} 👋
+              </p>
             </div>
           )}
 
+          {/* Edit Profile */}
           {activeTab === "edit-profile" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
               <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
               <form className="space-y-4" onSubmit={handleEditProfile}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
-                    disabled={user.authProvider === 'google'}
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    disabled={user.authProvider === "google"}
                   />
-                  {user.authProvider === 'google' && (
+                  {user.authProvider === "google" && (
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Email cannot be changed for Google accounts
                     </p>
                   )}
                 </div>
 
-                {editEmail !== user.email && user.authProvider !== 'google' && (
+                {editEmail !== user.email && user.authProvider !== "google" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Confirm Password
@@ -265,7 +293,7 @@ const ProfilePage = () => {
                       type="password"
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
-                      className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
@@ -274,11 +302,16 @@ const ProfilePage = () => {
                 <button className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                   Save Changes
                 </button>
-                {editMessage && <p className="mt-2 text-sm text-green-600 dark:text-green-400">{editMessage}</p>}
+                {editMessage && (
+                  <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                    {editMessage}
+                  </p>
+                )}
               </form>
             </div>
           )}
 
+          {/* Change Password */}
           {activeTab === "change-password" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
               <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
@@ -293,7 +326,7 @@ const ProfilePage = () => {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                   />
                 </div>
@@ -305,7 +338,7 @@ const ProfilePage = () => {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                   />
                 </div>
@@ -317,7 +350,7 @@ const ProfilePage = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                   />
                 </div>
@@ -325,55 +358,142 @@ const ProfilePage = () => {
                   Update Password
                 </button>
               </form>
-
-              {message && <p className="mt-2 text-sm text-red-500 dark:text-red-400">{message}</p>}
+              {message && (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400">
+                  {message}
+                </p>
+              )}
             </div>
           )}
 
+          {/* Theme Settings */}
           {activeTab === "theme-settings" && (
             <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
               <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Theme Settings
               </h2>
               <div className="space-y-4">
+                {/* Light Mode */}
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-600">
                   <div className="flex items-center">
                     <SunIcon className="w-5 h-5 mr-3 text-yellow-600" />
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">Light Mode</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Use light theme</p>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Light Mode
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Use light theme
+                      </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => !isDark || toggleTheme()}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!isDark
-                        ? 'bg-yellow-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
-                      }`}
+                    onClick={() => isDark && toggleTheme()}
+                    className={`px-4 py-2 text-sm font-medium rounded-md ${
+                      !isDark
+                        ? "bg-yellow-600 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
+                    }`}
                   >
-                    {!isDark ? 'ON' : 'OFF'}
+                    {!isDark ? "ON" : "OFF"}
                   </button>
                 </div>
 
+                {/* Dark Mode */}
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-600">
                   <div className="flex items-center">
                     <MoonIcon className="w-5 h-5 mr-3 text-blue-600" />
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">Dark Mode</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Use dark theme</p>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Dark Mode
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Use dark theme
+                      </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => isDark || toggleTheme()}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${isDark
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
-                      }`}
+                    onClick={() => !isDark && toggleTheme()}
+                    className={`px-4 py-2 text-sm font-medium rounded-md ${
+                      isDark
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
+                    }`}
                   >
-                    {isDark ? 'ON' : 'OFF'}
+                    {isDark ? "ON" : "OFF"}
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Wishlist */}
+          {activeTab === "wishlist" && (
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+                My Wishlist
+              </h2>
+              {wishlist.length === 0 ? (
+                <div className="py-12 text-center">
+                  <HeartIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600 dark:text-gray-300">
+                    No books in wishlist
+                  </p>
+                  <button
+                    onClick={() => navigate("/booklist")}
+                    className="px-4 py-2 mt-4 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                  >
+                    Browse Books
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {wishlist.map((item) => (
+                    <div
+                      key={item._id}
+                      className="p-4 transition-shadow border rounded-lg dark:border-gray-600 hover:shadow-md"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 w-16 h-20 bg-gray-200 rounded dark:bg-gray-700">
+                          {item.book?.imageUrl ? (
+                            <img
+                              src={item.book.imageUrl}
+                              alt={item.book.title}
+                              className="object-cover w-full h-full rounded"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center w-full h-full">
+                              <span className="text-xs text-gray-500">
+                                No Image
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 truncate dark:text-white">
+                            {item.book?.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            by {item.book?.author}
+                          </p>
+                          <p className="font-bold text-green-600">
+                            ${item.book?.price}
+                          </p>
+                          <button
+                            onClick={() =>
+                              navigate(`/book/${item.book._id}`, {
+                                state: { book: item.book },
+                              })
+                            }
+                            className="mt-2 text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </motion.div>

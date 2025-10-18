@@ -69,7 +69,7 @@ function Categories() {
   };
 
   const handleBookClick = (book) => {
-    navigate("/bookdetails", { state: { book } });
+    navigate(`/book/${book._id}`, { state: { book } });
   };
 
   if (loading) return <Loader />;
@@ -81,23 +81,23 @@ function Categories() {
           
           {/* Header */}
           <motion.div
-            className="text-center mb-12"
+            className="mb-12 text-center"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center justify-center mb-4">
-              <GridIcon className="w-8 h-8 text-purple-600 mr-3" />
+              <GridIcon className="w-8 h-8 mr-3 text-purple-600" />
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Book Categories</h1>
             </div>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
               Explore books by category. Find your favorite genres and discover new ones.
             </p>
           </motion.div>
 
           {/* Categories Grid */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
+            className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -116,7 +116,7 @@ function Categories() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <BookOpenIcon className="w-6 h-6 mx-auto mb-2" />
-                <h3 className="font-medium text-sm">{cat.category}</h3>
+                <h3 className="text-sm font-medium">{cat.category}</h3>
                 <p className="text-xs opacity-75">{cat.count} books</p>
               </motion.button>
             ))}
@@ -155,7 +155,7 @@ function Categories() {
                           e.stopPropagation();
                           addToCart(book);
                         }}
-                        className="absolute bottom-4 right-4 bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
+                        className="absolute px-3 py-1 text-sm text-white bg-purple-600 rounded bottom-4 right-4 hover:bg-purple-700"
                       >
                         Add to Cart
                       </button>
@@ -163,9 +163,9 @@ function Categories() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16">
-                  <BookOpenIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Books Found</h3>
+                <div className="py-16 text-center">
+                  <BookOpenIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">No Books Found</h3>
                   <p className="text-gray-600 dark:text-gray-300">No books available in this category yet.</p>
                 </div>
               )}

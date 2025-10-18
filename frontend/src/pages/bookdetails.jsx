@@ -1,23 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import { ShoppingCartIcon, DownloadIcon, ArrowLeftIcon } from 'lucide-react';
+import { ShoppingCartIcon, DownloadIcon, ArrowLeftIcon, ShareIcon, HeartIcon } from 'lucide-react';
 import Loader from '../components/Loader';
 
 const BookDetailsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuth();
 
-  const [book] = useState(location.state?.book || null);
+  const [book, setBook] = useState(location.state?.book || null);
   const [loading, setLoading] = useState(!book);
   const [purchased, setPurchased] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
-  // ✅ Fix: Wrap in useCallback to avoid ESLint warning
+  const fetchBook = useCallback(async () => {
+    if (!id) return;
+    try {
+      const response = await axios.get(`http://localhost:8000/api/books/${id}`);
+      setBook(response.data);
+    } catch (error) {
+      toast.error('Book not found');
+      navigate('/booklist');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate]);
+
   const checkIfPurchased = useCallback(async () => {
     if (!user || !book) {
       setLoading(false);
@@ -36,7 +50,6 @@ const BookDetailsPage = () => {
       setPurchased(hasPurchased);
     } catch (error) {
       console.error('Error checking purchase status:', error);
-      toast.error('Failed to check purchase status');
     } finally {
       setLoading(false);
     }
@@ -44,11 +57,11 @@ const BookDetailsPage = () => {
 
   useEffect(() => {
     if (!book) {
-      navigate('/booklist');
+      fetchBook();
     } else {
       checkIfPurchased();
     }
-  }, [book, navigate, checkIfPurchased]); // ✅ No ESLint warning now
+  }, [book, fetchBook, checkIfPurchased]);
 
   const handlePurchase = async () => {
     if (!user) {
@@ -85,11 +98,10 @@ const BookDetailsPage = () => {
         `http://localhost:8000/api/orders/download/${book._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob', // Important for file downloads
+          responseType: 'blob',
         }
       );
 
-      // Create a blob link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -108,6 +120,51 @@ const BookDetailsPage = () => {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: book.title,
+      text: `Check out "${book.title}" by ${book.author} - $${book.price}`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      toast.error('Share failed');
+    }
+  };
+
+  const handleLike = async () => {
+  if (!user) {
+    toast.error('Please login to add to wishlist');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const method = isLiked ? 'DELETE' : 'POST';
+    
+    await axios({
+      method,
+      url: 'http://localhost:8000/api/wishlist',
+      data: { bookId: book._id },
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setIsLiked(!isLiked);
+    toast.success(isLiked ? 'Removed from wishlist' : 'Added to wishlist');
+  } catch (error) {
+    toast.error('Failed to update wishlist');
+  }
+};
+
+
   if (loading || !book) {
     return <Loader />;
   }
@@ -115,25 +172,22 @@ const BookDetailsPage = () => {
   return (
     <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="px-4 py-24 mx-auto max-w-7xl sm:px-6 lg:px-8">
-
-        {/* Back Button */}
         <button
           onClick={() => navigate('/booklist')}
-          className="flex items-center mb-6 text-blue-600 hover:text-blue-800"
+          className="flex items-center mb-6 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
         >
           <ArrowLeftIcon className="w-4 h-4 mr-2" />
           Back to Books
         </button>
 
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
-          {/* Left column - Book Image */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="mb-8 lg:mb-0"
           >
-            <div className="overflow-hidden bg-gray-200 rounded-lg aspect-w-1 aspect-h-1">
+            <div className="overflow-hidden bg-gray-200 rounded-lg dark:bg-gray-700">
               {book.imageUrl ? (
                 <img
                   src={book.imageUrl}
@@ -141,14 +195,13 @@ const BookDetailsPage = () => {
                   className="object-cover w-full rounded-lg h-96"
                 />
               ) : (
-                <div className="flex items-center justify-center bg-gray-200 rounded-lg h-96">
-                  <span className="text-gray-500">No Image Available</span>
+                <div className="flex items-center justify-center bg-gray-200 rounded-lg dark:bg-gray-700 h-96">
+                  <span className="text-gray-500 dark:text-gray-400">No Image Available</span>
                 </div>
               )}
             </div>
           </motion.div>
 
-          {/* Right column - Book Info */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -163,58 +216,55 @@ const BookDetailsPage = () => {
             <div className="flex items-center space-x-4">
               <span className="text-3xl font-bold text-green-600">${book.price}</span>
               {book.isDigital && (
-                <span className="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
+                <span className="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-200">
                   Digital Book
                 </span>
               )}
             </div>
 
-            {/* Book Details */}
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            <button
+  onClick={handleLike}
+  className={`flex items-center justify-center w-full px-6 py-3 rounded-lg ${
+    isLiked 
+      ? 'text-red-600 bg-red-50 dark:bg-red-900 dark:text-red-400' 
+      : 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700'
+  } hover:bg-gray-200 dark:hover:bg-gray-600`}
+>
+  <HeartIcon className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+  {isLiked ? 'Remove from Wishlist' : 'Add to Wishlist'}
+</button>
+
+
+            <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+              <div className="grid grid-cols-1 gap-3 text-sm">
                 {book.category && (
-                  <div>
-                    <span className="font-medium text-gray-700">Category:</span>
-                    <span className="ml-2 text-gray-600">{book.category}</span>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Category:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{book.category}</span>
                   </div>
                 )}
                 {book.isbn && (
-                  <div>
-                    <span className="font-medium text-gray-700">ISBN:</span>
-                    <span className="ml-2 text-gray-600">{book.isbn}</span>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">ISBN:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{book.isbn}</span>
                   </div>
                 )}
                 {book.pages && (
-                  <div>
-                    <span className="font-medium text-gray-700">Pages:</span>
-                    <span className="ml-2 text-gray-600">{book.pages}</span>
-                  </div>
-                )}
-                {book.fileSize && (
-                  <div>
-                    <span className="font-medium text-gray-700">File Size:</span>
-                    <span className="ml-2 text-gray-600">{book.fileSize}</span>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Pages:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{book.pages}</span>
                   </div>
                 )}
                 {book.publisher && (
-                  <div>
-                    <span className="font-medium text-gray-700">Publisher:</span>
-                    <span className="ml-2 text-gray-600">{book.publisher}</span>
-                  </div>
-                )}
-                {book.publicationDate && (
-                  <div>
-                    <span className="font-medium text-gray-700">Published:</span>
-                    <span className="ml-2 text-gray-600">
-                      {new Date(book.publicationDate).toLocaleDateString()}
-                    </span>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Publisher:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{book.publisher}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {!user ? (
                 <button
                   onClick={() => navigate('/login')}
@@ -241,11 +291,18 @@ const BookDetailsPage = () => {
                   {actionLoading ? 'Processing...' : `Buy Now - $${book.price}`}
                 </button>
               )}
+              
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center w-full px-6 py-3 text-gray-700 bg-gray-100 rounded-lg dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                <ShareIcon className="w-5 h-5 mr-2" />
+                Share Book
+              </button>
             </div>
           </motion.div>
         </div>
 
-        {/* Book Description */}
         {book.description && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

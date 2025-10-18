@@ -1,2 +1,2 @@
 pading:
-now start profile page
+fix UI pages

@@ -92,19 +92,20 @@ function Booklist() {
   };
 
   const handleBookClick = (book) => {
-    navigate("/bookdetails", { state: { book } });
+    navigate(`/book/${book._id}`, { state: { book } });
+
   };
 
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
 
           {/* Search and filter section */}
           <motion.div
-            className="p-4 mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:bg-gray-800"
+            className="p-4 mb-8 bg-white rounded-lg shadow-sm dark:bg-gray-800"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
