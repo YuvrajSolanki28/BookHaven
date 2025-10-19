@@ -1,20 +1,11 @@
 // src/pages/ProfilePage.js
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  UserIcon,
-  ShoppingBagIcon,
-  HeartIcon,
-  CreditCardIcon,
-  SettingsIcon,
-  LogOutIcon,
-  ChevronDownIcon,
-  MoonIcon,
-  SunIcon,
-} from "lucide-react";
+import { UserIcon, ShoppingBagIcon, HeartIcon, CreditCardIcon, SettingsIcon, LogOutIcon, ChevronDownIcon, MoonIcon, SunIcon, } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import UserPreferences from "../components/UserPreferences";
 import Loader from "../components/Loader";
 import axios from "axios";
 
@@ -24,6 +15,7 @@ const ProfilePage = () => {
   const { user, logout, loading } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
+  const [orders, setOrders] = useState([]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,11 +30,11 @@ const ProfilePage = () => {
 
   // Redirect unauthorized users
   // Redirect unauthorized users
-useEffect(() => {
-  if (!loading && !user && !localStorage.getItem("token")) {
-    navigate("/login");
-  }
-}, [loading, user, navigate]);
+  useEffect(() => {
+    if (!loading && !user && !localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [loading, user, navigate]);
 
 
   // Initialize edit fields
@@ -113,6 +105,25 @@ useEffect(() => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:8001/api/orders/my-orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOrders(response.data);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      setOrders([]);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "orders" && user) {
+      fetchOrders();
+    }
+  }, [activeTab, user]);
+
   if (loading || !user) {
     return <Loader />;
   }
@@ -143,13 +154,14 @@ useEffect(() => {
                   </div>
                 )}
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-semibold text-gray-900 truncate dark:text-white">
                   {user.fullName}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                <p className="text-sm text-gray-500 truncate dark:text-gray-400">{user.email}</p>
               </div>
             </div>
+
 
             {/* Sidebar Nav */}
             <nav className="space-y-1">
@@ -162,11 +174,10 @@ useEffect(() => {
                 <button
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
-                  className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${
-                    activeTab === item.key
-                      ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
+                  className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${activeTab === item.key
+                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    }`}
                 >
                   <item.icon size={18} className="mr-3" />
                   <span>{item.label}</span>
@@ -183,9 +194,8 @@ useEffect(() => {
                   <span>Account Settings</span>
                   <ChevronDownIcon
                     size={16}
-                    className={`ml-auto transition-transform duration-200 ${
-                      settingsDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`ml-auto transition-transform duration-200 ${settingsDropdownOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -206,10 +216,10 @@ useEffect(() => {
                       </button>
                     )}
                     <button
-                      onClick={() => setActiveTab("theme-settings")}
+                      onClick={() => setActiveTab("preferences")}
                       className="flex w-full px-3 py-2 text-sm text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                      Theme Settings
+                      preferences
                     </button>
                   </div>
                 )}
@@ -388,11 +398,10 @@ useEffect(() => {
                   </div>
                   <button
                     onClick={() => isDark && toggleTheme()}
-                    className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      !isDark
-                        ? "bg-yellow-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium rounded-md ${!isDark
+                      ? "bg-yellow-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
+                      }`}
                   >
                     {!isDark ? "ON" : "OFF"}
                   </button>
@@ -413,11 +422,10 @@ useEffect(() => {
                   </div>
                   <button
                     onClick={() => !isDark && toggleTheme()}
-                    className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      isDark
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium rounded-md ${isDark
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300"
+                      }`}
                   >
                     {isDark ? "ON" : "OFF"}
                   </button>
@@ -496,6 +504,64 @@ useEffect(() => {
               )}
             </div>
           )}
+
+          {/* Orders */}
+          {activeTab === "orders" && (
+            <div className="p-6 mb-6 bg-white rounded-lg shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+                Order History
+              </h2>
+              {orders.length === 0 ? (
+                <div className="py-12 text-center">
+                  <ShoppingBagIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600 dark:text-gray-300">No orders found</p>
+                  <button
+                    onClick={() => navigate("/booklist")}
+                    className="px-4 py-2 mt-4 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                  >
+                    Start Shopping
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <div key={order._id} className="p-4 border rounded-lg dark:border-gray-600">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            Order #{order._id.slice(-8)}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(order.orderDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-green-600">${order.totalAmount}</p>
+                          <span className={`px-2 py-1 text-xs rounded-full ${order.paymentStatus === 'completed'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : order.paymentStatus === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            }`}>
+                            {order.paymentStatus}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {order.books.map((book, index) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span className="text-gray-700 dark:text-gray-300">{book.title}</span>
+                            <span className="text-gray-600 dark:text-gray-400">${book.price}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {activeTab === 'preferences' && <UserPreferences />}
         </motion.div>
       </div>
     </div>

@@ -15,7 +15,20 @@ const userSchema = new mongoose.Schema({
     token: { type: String },
     isAdmin: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
-    verifiedAt: { type: Date }
+    verifiedAt: { type: Date },
+    preferences: {
+        theme: { type: String, enum: ['light', 'dark', 'auto'], default: 'light' },
+        language: { type: String, default: 'en' },
+        notifications: {
+            email: { type: Boolean, default: true },
+            push: { type: Boolean, default: true },
+            newReleases: { type: Boolean, default: true }
+        },
+        privacy: {
+            profileVisible: { type: Boolean, default: true },
+            purchaseHistory: { type: Boolean, default: false }
+        }
+    }
 });
 
 // Check if verification expired (2 weeks)

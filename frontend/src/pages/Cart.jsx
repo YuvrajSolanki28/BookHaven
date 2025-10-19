@@ -101,7 +101,7 @@ const BookCart = () => {
   }
 
   return (
-    <div className="min-h-screen py-24 bg-gray-50">
+    <div className="min-h-screen py-24 bg-gray-50 ">
       <div className="max-w-4xl px-4 mx-auto">
 
         {/* Header */}
@@ -119,7 +119,7 @@ const BookCart = () => {
           <span className="text-lg text-gray-600">{cart.length} items</span>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white rounded-lg shadow ">
 
           {/* Cart Items */}
           <div className="p-6">

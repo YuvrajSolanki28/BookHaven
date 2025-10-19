@@ -294,6 +294,24 @@ router.put("/update-profile", async (req, res) => {
   }
 });
 
+// backend/routes/user.js - Add these routes
+router.get('/preferences/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('preferences');
+    res.json(user.preferences || {});
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+router.put('/preferences/:userId', async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.params.userId, { preferences: req.body });
+    res.json({ message: 'Preferences updated' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
 
 
 

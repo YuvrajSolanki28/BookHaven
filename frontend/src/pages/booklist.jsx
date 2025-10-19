@@ -10,10 +10,7 @@ import Loader from "../components/Loader";
 
 function Booklist() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
   const [books, setBooks] = useState([]);
-  const [filteredBooks, setFilteredBooks] = useState([]);
-  const [sortBy, setSortBy] = useState("title");
   const [loading, setLoading] = useState(true);
   const booksPerPage = 9;
   const navigate = useNavigate();
@@ -27,39 +24,12 @@ function Booklist() {
     try {
       const response = await axios.get('http://localhost:8000/api/books');
       setBooks(response.data);
-      setFilteredBooks(response.data);
     } catch (error) {
       toast.error('Failed to fetch books');
     } finally {
       setLoading(false);
     }
   };
-
-  // Filter and sort books
-  useEffect(() => {
-    let result = [...books];
-
-    if (searchTerm) {
-      result = result.filter(
-        book =>
-          book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          book.author?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    result.sort((a, b) => {
-      if (sortBy === "price-low") {
-        return a.price - b.price;
-      } else if (sortBy === "price-high") {
-        return b.price - a.price;
-      } else {
-        return a.title.localeCompare(b.title);
-      }
-    });
-
-    setFilteredBooks(result);
-    setCurrentPage(1);
-  }, [searchTerm, sortBy, books]);
 
   const addToCart = (book) => {
     if (!user) {
@@ -83,17 +53,16 @@ function Booklist() {
     }
   };
 
-  const totalPages = filteredBooks?.length ? Math.ceil(filteredBooks.length / booksPerPage) : 0;
+  const totalPages = books?.length ? Math.ceil(books.length / booksPerPage) : 0;
 
   const getCurrentPageBooks = () => {
-    if (!filteredBooks?.length) return [];
+    if (!books?.length) return [];
     const startIndex = (currentPage - 1) * booksPerPage;
-    return filteredBooks.slice(startIndex, startIndex + booksPerPage);
+    return books.slice(startIndex, startIndex + booksPerPage);
   };
 
   const handleBookClick = (book) => {
     navigate(`/book/${book._id}`, { state: { book } });
-
   };
 
   if (loading) return <Loader />;
@@ -103,37 +72,6 @@ function Booklist() {
       <main className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
 
-          {/* Search and filter section */}
-          <motion.div
-            className="p-4 mb-8 bg-white rounded-lg shadow-sm dark:bg-gray-800"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <div className="w-full md:w-1/2">
-                <input
-                  type="text"
-                  placeholder="Search by title or author..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="w-full md:w-1/3">
-                <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="title">Sort by Title</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                </select>
-              </div>
-            </div>
-          </motion.div>
-
           {/* Results count */}
           <motion.div
             className="mb-4 text-gray-600 dark:text-gray-300"
@@ -141,11 +79,11 @@ function Booklist() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Showing {filteredBooks?.length || 0} books
+            Showing {books?.length || 0} books
           </motion.div>
 
           {/* Book grid */}
-          {filteredBooks?.length > 0 ? (
+          {books?.length > 0 ? (
             <motion.div
               className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
               initial={{ opacity: 0 }}
@@ -184,14 +122,14 @@ function Booklist() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              No books found matching your search criteria.
+              No books found.
             </motion.div>
           )}
 
           {/* Pagination */}
-          {filteredBooks?.length > 0 && (
+          {books?.length > 0 && (
             <motion.div
-              className="mt-6"
+              className="flex justify-center mt-6 dark:text-white"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}

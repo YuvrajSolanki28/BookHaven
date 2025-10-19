@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import PaymentModal from '../components/PaymentModal';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { ShoppingCartIcon, DownloadIcon, ArrowLeftIcon, ShareIcon, HeartIcon } from 'lucide-react';
@@ -12,7 +13,7 @@ const BookDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
-
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [book, setBook] = useState(location.state?.book || null);
   const [loading, setLoading] = useState(!book);
   const [purchased, setPurchased] = useState(false);
@@ -68,7 +69,10 @@ const BookDetailsPage = () => {
       toast.error('Please login to purchase');
       return;
     }
+    setShowPaymentModal(true);
+  };
 
+  const handlePaymentSuccess = async () => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem('token');
@@ -88,6 +92,7 @@ const BookDetailsPage = () => {
       setActionLoading(false);
     }
   };
+
 
   const handleDownload = async () => {
     try {
@@ -141,28 +146,28 @@ const BookDetailsPage = () => {
   };
 
   const handleLike = async () => {
-  if (!user) {
-    toast.error('Please login to add to wishlist');
-    return;
-  }
+    if (!user) {
+      toast.error('Please login to add to wishlist');
+      return;
+    }
 
-  try {
-    const token = localStorage.getItem('token');
-    const method = isLiked ? 'DELETE' : 'POST';
-    
-    await axios({
-      method,
-      url: 'http://localhost:8000/api/wishlist',
-      data: { bookId: book._id },
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const token = localStorage.getItem('token');
+      const method = isLiked ? 'DELETE' : 'POST';
 
-    setIsLiked(!isLiked);
-    toast.success(isLiked ? 'Removed from wishlist' : 'Added to wishlist');
-  } catch (error) {
-    toast.error('Failed to update wishlist');
-  }
-};
+      await axios({
+        method,
+        url: 'http://localhost:8000/api/wishlist',
+        data: { bookId: book._id },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setIsLiked(!isLiked);
+      toast.success(isLiked ? 'Removed from wishlist' : 'Added to wishlist');
+    } catch (error) {
+      toast.error('Failed to update wishlist');
+    }
+  };
 
 
   if (loading || !book) {
@@ -223,16 +228,15 @@ const BookDetailsPage = () => {
             </div>
 
             <button
-  onClick={handleLike}
-  className={`flex items-center justify-center w-full px-6 py-3 rounded-lg ${
-    isLiked 
-      ? 'text-red-600 bg-red-50 dark:bg-red-900 dark:text-red-400' 
-      : 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700'
-  } hover:bg-gray-200 dark:hover:bg-gray-600`}
->
-  <HeartIcon className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-  {isLiked ? 'Remove from Wishlist' : 'Add to Wishlist'}
-</button>
+              onClick={handleLike}
+              className={`flex items-center justify-center w-full px-6 py-3 rounded-lg ${isLiked
+                ? 'text-red-600 bg-red-50 dark:bg-red-900 dark:text-red-400'
+                : 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700'
+                } hover:bg-gray-200 dark:hover:bg-gray-600`}
+            >
+              <HeartIcon className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+              {isLiked ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            </button>
 
 
             <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
@@ -291,7 +295,7 @@ const BookDetailsPage = () => {
                   {actionLoading ? 'Processing...' : `Buy Now - $${book.price}`}
                 </button>
               )}
-              
+
               <button
                 onClick={handleShare}
                 className="flex items-center justify-center w-full px-6 py-3 text-gray-700 bg-gray-100 rounded-lg dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -316,6 +320,13 @@ const BookDetailsPage = () => {
             </div>
           </motion.div>
         )}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          totalAmount={book.price}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+
       </main>
     </div>
   );

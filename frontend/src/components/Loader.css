@@ -1,4 +1,4 @@
-/* Circle Loader CSS */
+/* Circle Loader CSS (Fixed) */
 .loader {
   width: 50px;
   --b: 8px;
@@ -6,15 +6,24 @@
   border-radius: 50%;
   padding: 1px;
   background: conic-gradient(#0000 10%, #0347c7) content-box;
-  -webkit-mask: repeating-conic-gradient(#0000 0deg, #000 1deg 20deg, #0000 21deg 36deg),
+  -webkit-mask: 
+    repeating-conic-gradient(#0000 0deg, #000 1deg 20deg, #0000 21deg 36deg),
     radial-gradient(farthest-side, #0000 calc(100% - var(--b) - 1px), #000 calc(100% - var(--b)));
   -webkit-mask-composite: destination-in;
   mask-composite: intersect;
   animation: l4 1s infinite steps(10);
 }
 
+/* Rotation animation */
 @keyframes l4 {
   to {
     transform: rotate(1turn);
+  }
+}
+
+/* Optional dark mode support */
+@media (prefers-color-scheme: dark) {
+  .loader {
+    background: conic-gradient(#0000 10%, #3b82f6) content-box;
   }
 }

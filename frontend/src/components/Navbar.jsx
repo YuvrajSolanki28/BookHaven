@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Menu, X, CircleUserRound } from "lucide-react";
+import { ShoppingCart, Menu, X, CircleUserRound, Search } from "lucide-react";
+import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AdvancedSearch from './AdvancedSearch';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -9,6 +11,7 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const { user } = useAuth();
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -51,7 +54,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm">
+    <nav className="fixed top-0 z-50 w-full bg-white shadow-sm dark:bg-gray-800">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand/Logo */}
@@ -90,6 +93,13 @@ const Navbar = () => {
                 My Library
               </a>
             )}
+            <button
+              onClick={() => setShowAdvancedSearch(true)}
+              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
+              <Search className="w-5 h-5" />
+              <span>Search</span>
+            </button>
           </div>
 
           {/* Cart, Login/Profile, and Mobile Menu Button */}
@@ -100,7 +110,7 @@ const Navbar = () => {
             >
               <ShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-2 -right-2">
                   {cartCount}
                 </span>
               )}
@@ -178,6 +188,17 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      <AnimatePresence>
+        {showAdvancedSearch && (
+          <AdvancedSearch
+            onSearch={(params) => {
+              // Handle search - you can navigate to search results page
+              navigate('/search-results', { state: { searchParams: params } });
+            }}
+            onClose={() => setShowAdvancedSearch(false)}
+          />
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
