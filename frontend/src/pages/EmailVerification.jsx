@@ -18,7 +18,7 @@ const EmailVerification = () => {
 
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`http://localhost:8001/api/auth/verify?token=${token}`);
+        const response = await fetch(`https://book-haven-iota.vercel.app/api/auth/verify?token=${token}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -41,33 +41,33 @@ const EmailVerification = () => {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-8 text-center bg-white rounded-lg shadow-md">
         {status === 'verifying' && (
           <div>
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Verifying Email</h2>
+            <div className="w-12 h-12 mx-auto mb-4 border-b-2 rounded-full animate-spin border-emerald-600"></div>
+            <h2 className="mb-2 text-xl font-semibold text-gray-900">Verifying Email</h2>
             <p className="text-gray-600">Please wait while we verify your email...</p>
           </div>
         )}
         
         {status === 'success' && (
           <div>
-            <div className="text-emerald-600 text-5xl mb-4">✓</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Email Verified!</h2>
-            <p className="text-gray-600 mb-4">{message}</p>
+            <div className="mb-4 text-5xl text-emerald-600">✓</div>
+            <h2 className="mb-2 text-xl font-semibold text-gray-900">Email Verified!</h2>
+            <p className="mb-4 text-gray-600">{message}</p>
             <p className="text-sm text-gray-500">Redirecting to home page...</p>
           </div>
         )}
         
         {status === 'error' && (
           <div>
-            <div className="text-red-600 text-5xl mb-4">✗</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Verification Failed</h2>
-            <p className="text-gray-600 mb-4">{message}</p>
+            <div className="mb-4 text-5xl text-red-600">✗</div>
+            <h2 className="mb-2 text-xl font-semibold text-gray-900">Verification Failed</h2>
+            <p className="mb-4 text-gray-600">{message}</p>
             <button
               onClick={() => window.location.href = '/login'}
-              className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"
+              className="px-4 py-2 text-white rounded bg-emerald-600 hover:bg-emerald-700"
             >
               Go to Login
             </button>

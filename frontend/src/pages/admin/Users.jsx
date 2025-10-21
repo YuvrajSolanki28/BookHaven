@@ -27,7 +27,7 @@ function Users() {
         const token = localStorage.getItem('token');
         console.log('Fetching users with token:', token ? 'Token exists' : 'No token');
         
-        const response = await axios.get('http://localhost:8000/api/auth/admin/users', {
+        const response = await axios.get('https://book-haven-iota.vercel.app/api/auth/admin/users', {
             headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -45,7 +45,7 @@ function Users() {
     const deleteUser = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/auth/admin/users/${deleteModal.userId}`, {
+            await axios.delete(`https://book-haven-iota.vercel.app/api/auth/admin/users/${deleteModal.userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(users.filter(u => u._id !== deleteModal.userId));
@@ -59,7 +59,7 @@ function Users() {
     const toggleAdminStatus = async (userId, currentStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8000/api/auth/admin/users/${userId}/admin`, 
+            await axios.put(`https://book-haven-iota.vercel.app/api/auth/admin/users/${userId}/admin`, 
                 { isAdmin: !currentStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -88,32 +88,32 @@ function Users() {
     return (
         <>
             <AdminNavbar />
-            <div className="container px-4 mx-auto py-8">
+            <div className="container px-4 py-8 mx-auto">
                 <h1 className="mb-8 text-3xl font-bold text-gray-800">User Management</h1>
 
                 {/* Search */}
-                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <div className="p-6 mb-6 bg-white rounded-lg shadow">
                     <div className="relative">
-                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <SearchIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
                         <input
                             type="text"
                             placeholder="Search users by name or email..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="overflow-hidden bg-white rounded-lg shadow">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-lg font-semibold">All Users ({filteredUsers.length})</h2>
                     </div>
                     
                     {filteredUsers.length === 0 ? (
-                        <div className="text-center py-12">
-                            <UserIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                        <div className="py-12 text-center">
+                            <UserIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                             <p className="text-gray-500">No users found</p>
                         </div>
                     ) : (
@@ -121,19 +121,19 @@ function Users() {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             User
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Auth Type
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Status
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Role
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Actions
                                         </th>
                                     </tr>
@@ -143,7 +143,7 @@ function Users() {
                                         <tr key={user._id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full">
                                                         {user.profilePicture ? (
                                                             <img src={user.profilePicture} alt="" className="w-10 h-10 rounded-full" />
                                                         ) : (
@@ -180,13 +180,13 @@ function Users() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    {user.isAdmin && <ShieldIcon className="w-4 h-4 text-blue-600 mr-1" />}
+                                                    {user.isAdmin && <ShieldIcon className="w-4 h-4 mr-1 text-blue-600" />}
                                                     <span className={user.isAdmin ? 'text-blue-600 font-medium' : 'text-gray-600'}>
                                                         {user.isAdmin ? 'Admin' : 'User'}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                 <div className="flex space-x-2">
                                                     <button
                                                         onClick={() => toggleAdminStatus(user._id, user.isAdmin)}
@@ -200,9 +200,9 @@ function Users() {
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteUser(user)}
-                                                        className="text-red-600 hover:text-red-900 p-1 rounded"
+                                                        className="p-1 text-red-600 rounded hover:text-red-900"
                                                     >
-                                                        <TrashIcon className="h-4 w-4" />
+                                                        <TrashIcon className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </td>

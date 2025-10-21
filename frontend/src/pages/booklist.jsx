@@ -22,7 +22,7 @@ function Booklist() {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/books');
+      const response = await axios.get('https://book-haven-iota.vercel.app/api/books');
       setBooks(response.data);
     } catch (error) {
       toast.error('Failed to fetch books');

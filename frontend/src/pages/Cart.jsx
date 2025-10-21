@@ -48,7 +48,7 @@ const BookCart = () => {
       const token = localStorage.getItem('token');
       const bookIds = cart.map(book => book._id);
 
-      await axios.post('http://localhost:8000/api/orders/create',
+      await axios.post('https://book-haven-iota.vercel.app/api/orders/create',
         { bookIds },
         { headers: { Authorization: `Bearer ${token}` } }
       );

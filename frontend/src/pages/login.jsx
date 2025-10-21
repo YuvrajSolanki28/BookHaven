@@ -37,7 +37,7 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
+      const response = await fetch('https://book-haven-iota.vercel.app/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -80,7 +80,7 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/verify', {
+      const response = await fetch('https://book-haven-iota.vercel.app/api/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: verificationCode }),

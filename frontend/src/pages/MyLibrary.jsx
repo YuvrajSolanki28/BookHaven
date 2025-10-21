@@ -18,7 +18,7 @@ const MyLibrary = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/orders/my-orders', {
+      const response = await axios.get('https://book-haven-iota.vercel.app/api/orders/my-orders', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(response.data);
@@ -33,7 +33,7 @@ const MyLibrary = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8000/api/orders/download/${bookId}`,
+        `https://book-haven-iota.vercel.app/api/orders/download/${bookId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',

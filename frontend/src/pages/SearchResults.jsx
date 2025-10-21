@@ -27,7 +27,7 @@ const SearchResults = () => {
         limit: 12
       });
       
-      const response = await axios.get(`http://localhost:8000/api/books/search?${params}`);
+      const response = await axios.get(`https://book-haven-iota.vercel.app/api/books/search?${params}`);
       setResults(response.data.books);
       setPagination(response.data.pagination);
     } catch (error) {

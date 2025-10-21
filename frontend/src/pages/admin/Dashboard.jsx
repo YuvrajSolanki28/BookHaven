@@ -32,8 +32,8 @@ function Dashboard() {
 
         // Use existing routes
         const [booksRes, ordersRes] = await Promise.all([
-            axios.get('http://localhost:8000/api/books'),
-            axios.get('http://localhost:8000/api/orders/all-orders', { headers }) // Use existing route
+            axios.get('https://book-haven-iota.vercel.app/api/books'),
+            axios.get('https://book-haven-iota.vercel.app/api/orders/all-orders', { headers }) // Use existing route
         ]);
 
         const books = booksRes.data;
@@ -66,11 +66,11 @@ function Dashboard() {
     return (
         <>
             <AdminNavbar />
-            <div className="container px-4 mx-auto py-8">
+            <div className="container px-4 py-8 mx-auto">
                 <h1 className="mb-8 text-3xl font-bold text-gray-800">Admin Dashboard</h1>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
                     <StatCard
                         title="Total Books"
                         value={stats.totalBooks}
@@ -98,8 +98,8 @@ function Dashboard() {
                 </div>
 
                 {/* Recent Orders */}
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+                <div className="p-6 bg-white rounded-lg shadow">
+                    <h2 className="mb-4 text-xl font-semibold">Recent Orders</h2>
                     {recentOrders.length === 0 ? (
                         <p className="text-gray-500">No orders yet</p>
                     ) : (
@@ -107,16 +107,16 @@ function Dashboard() {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Order ID
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Books
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Amount
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">
                                             Date
                                         </th>
                                     </tr>
@@ -124,16 +124,16 @@ function Dashboard() {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {recentOrders.map((order) => (
                                         <tr key={order._id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                                 #{order._id.slice(-6)}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-900">
                                                 {order.books.length} book(s)
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                                 ${order.totalAmount.toFixed(2)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                                 {new Date(order.orderDate).toLocaleDateString()}
                                             </td>
                                         </tr>
@@ -150,7 +150,7 @@ function Dashboard() {
 
 // Stat Card Component
 const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="p-6 bg-white rounded-lg shadow">
         <div className="flex items-center">
             <div className={`${color} rounded-lg p-3`}>
                 <Icon className="w-6 h-6 text-white" />

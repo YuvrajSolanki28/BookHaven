@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async (token, decoded) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/auth/profile/${token}`);
+      const response = await fetch(`https://book-haven-iota.vercel.app/api/auth/profile/${token}`);
       if (response.ok) {
         const data = await response.json();
         setUser({ ...data, isAdmin: decoded.isAdmin || false });

@@ -25,7 +25,7 @@ function AddBooks() {
 
     const fetchBooks = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/books');
+            const response = await axios.get('https://book-haven-iota.vercel.app/api/books');
             setBooks(response.data);
         } catch (error) {
             toast.error('Failed to fetch books');
@@ -37,7 +37,7 @@ function AddBooks() {
     const addBook = async (bookData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8000/api/books', bookData, {
+            const response = await axios.post('https://book-haven-iota.vercel.app/api/books', bookData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks([response.data.book, ...books]);
@@ -50,7 +50,7 @@ function AddBooks() {
     const editBook = async (bookData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:8000/api/books/${editingBook._id}`, bookData, {
+            const response = await axios.put(`https://book-haven-iota.vercel.app/api/books/${editingBook._id}`, bookData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks(books.map(book => book._id === editingBook._id ? response.data.book : book));
@@ -64,7 +64,7 @@ function AddBooks() {
     const deleteBook = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/books/${deleteModal.bookId}`, {
+            await axios.delete(`https://book-haven-iota.vercel.app/api/books/${deleteModal.bookId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks(books.filter(book => book._id !== deleteModal.bookId));
@@ -102,7 +102,7 @@ function AddBooks() {
     return (
         <>
             <AdminNavbar />
-            <div className="container px-4 mx-auto py-8">
+            <div className="container px-4 py-8 mx-auto">
                 <h1 className="mb-6 text-3xl font-bold text-gray-800">
                     Book Management
                 </h1>

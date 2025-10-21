@@ -21,7 +21,7 @@ function NewReleases() {
   const fetchNewReleases = async () => {
     try {
         // Temporarily get all books sorted by newest first
-        const response = await axios.get('http://localhost:8000/api/books');
+        const response = await axios.get('https://book-haven-iota.vercel.app/api/books');
         
         // Sort by creation date and take first 12 books
         const sortedBooks = response.data

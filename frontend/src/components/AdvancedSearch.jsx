@@ -30,7 +30,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
 
   const fetchSearchHistory = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/books/search-history/${user.id}`);
+      const response = await axios.get(`https://book-haven-iota.vercel.app/api/books/search-history/${user.id}`);
       setSearchHistory(response.data);
     } catch (error) {
       console.error('Failed to fetch search history');
@@ -75,7 +75,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/api/books/autocomplete?q=${query}&type=${searchType}`);
+      const response = await axios.get(`https://book-haven-iota.vercel.app/api/books/autocomplete?q=${query}&type=${searchType}`);
       setSuggestions(response.data);
     } catch (error) {
       setSuggestions([]);

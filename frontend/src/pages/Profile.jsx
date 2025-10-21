@@ -50,7 +50,7 @@ const ProfilePage = () => {
   const fetchWishlist = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8000/api/wishlist", {
+      const response = await axios.get("https://book-haven-iota.vercel.app/api/wishlist", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWishlist(response.data);
@@ -72,7 +72,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        "http://localhost:8000/api/auth/update-profile",
+        "https://book-haven-iota.vercel.app/api/auth/update-profile",
         { fullName: editName, email: editEmail, password: editPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +93,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:8000/api/auth/change-password",
+        "https://book-haven-iota.vercel.app/api/auth/change-password",
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
