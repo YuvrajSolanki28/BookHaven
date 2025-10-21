@@ -32,8 +32,8 @@ function Dashboard() {
 
         // Use existing routes
         const [booksRes, ordersRes] = await Promise.all([
-            axios.get('https://book-haven-iota.vercel.app/api/books'),
-            axios.get('https://book-haven-iota.vercel.app/api/orders/all-orders', { headers }) // Use existing route
+            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books`),
+            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/all-orders`, { headers }) // Use existing route
         ]);
 
         const books = booksRes.data;

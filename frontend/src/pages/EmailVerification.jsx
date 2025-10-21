@@ -18,7 +18,7 @@ const EmailVerification = () => {
 
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`https://book-haven-iota.vercel.app/api/auth/verify?token=${token}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verify?token=${token}`);
         const data = await response.json();
 
         if (response.ok) {

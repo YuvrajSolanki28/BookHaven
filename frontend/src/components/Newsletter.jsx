@@ -11,7 +11,7 @@ const Newsletter = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('https://book-haven-iota.vercel.app/api/marketing/newsletter', { email });
+      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/marketing/newsletter`, { email });
       toast.success('Subscribed to newsletter!');
       setEmail('');
     } catch (error) {

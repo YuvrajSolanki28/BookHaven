@@ -14,7 +14,7 @@ const LoyaltyPoints = () => {
 
   const fetchPoints = async () => {
     try {
-      const response = await axios.get(`https://book-haven-iota.vercel.app/api/marketing/loyalty/${user.id}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/marketing/loyalty/${user.id}`);
       setPoints(response.data.points);
     } catch (error) {
       console.error('Failed to fetch points');

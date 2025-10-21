@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: 'https://book-haven-iota.vercel.app',
+  baseURL: process.env.REACT_APP_BACKEND_URL,
 });
 
 // Attach JWT automatically

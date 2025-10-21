@@ -2,7 +2,7 @@ import React from 'react';
 
 const GoogleLoginButton = ({ text = "Continue with Google" }) => {
     const handleGoogleLogin = () => {
-        window.location.href = 'https://book-haven-iota.vercel.app/auth/google';
+        window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
     };
 
     return (

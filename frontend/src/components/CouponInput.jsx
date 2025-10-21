@@ -12,7 +12,7 @@ const CouponInput = ({ totalAmount, onDiscountApplied }) => {
     
     setLoading(true);
     try {
-      const response = await axios.post('https://book-haven-iota.vercel.app/api/marketing/apply-coupon', {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/marketing/apply-coupon`, {
         code: couponCode,
         amount: totalAmount
       });

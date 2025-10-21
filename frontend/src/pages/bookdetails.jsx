@@ -23,7 +23,7 @@ const BookDetailsPage = () => {
   const fetchBook = useCallback(async () => {
     if (!id) return;
     try {
-      const response = await axios.get(`https://book-haven-iota.vercel.app/api/books/${id}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/${id}`);
       setBook(response.data);
     } catch (error) {
       toast.error('Book not found');
@@ -41,7 +41,7 @@ const BookDetailsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://book-haven-iota.vercel.app/api/orders/my-orders', {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/my-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -78,7 +78,7 @@ const BookDetailsPage = () => {
       const token = localStorage.getItem('token');
 
       await axios.post(
-        'https://book-haven-iota.vercel.app/api/orders/create',
+        `${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
         { bookIds: [book._id] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -100,7 +100,7 @@ const BookDetailsPage = () => {
       const token = localStorage.getItem('token');
 
       const response = await axios.get(
-        `https://book-haven-iota.vercel.app/api/orders/download/${book._id}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/orders/download/${book._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
@@ -157,7 +157,7 @@ const BookDetailsPage = () => {
 
       await axios({
         method,
-        url: 'https://book-haven-iota.vercel.app/api/wishlist',
+        url: `${process.env.REACT_APP_BACKEND_URL}/api/wishlist`,
         data: { bookId: book._id },
         headers: { Authorization: `Bearer ${token}` }
       });

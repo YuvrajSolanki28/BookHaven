@@ -28,7 +28,7 @@ function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('https://book-haven-iota.vercel.app/api/books/categories');
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/categories`);
       setCategories(response.data);
       if (response.data.length > 0) {
         setSelectedCategory(response.data[0].category);
@@ -42,7 +42,7 @@ function Categories() {
 
   const fetchBooksByCategory = async (category) => {
     try {
-      const response = await axios.get(`https://book-haven-iota.vercel.app/api/books/category/${category}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/category/${category}`);
       setBooks(response.data);
     } catch (error) {
       toast.error('Failed to fetch books');

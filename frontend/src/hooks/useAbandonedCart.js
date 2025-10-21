@@ -11,7 +11,7 @@ export const useAbandonedCart = () => {
       const cart = JSON.parse(localStorage.getItem('bookCart') || '[]');
       if (cart.length > 0) {
         // Send abandoned cart email
-        fetch('http://localhost:8000/api/marketing/abandoned-cart', {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/marketing/abandoned-cart`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userEmail: user.email, cartItems: cart })
