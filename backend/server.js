@@ -60,6 +60,10 @@ app.use("/api/orders", ordersRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/marketing", marketingRoutes);
 
+app.get("/", (req, res) => {
+    res.send("Hello World!");
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
