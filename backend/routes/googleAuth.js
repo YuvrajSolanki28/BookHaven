@@ -58,7 +58,7 @@ router.get('/google/callback',
             { expiresIn: '7d' }
         );
         
-        res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+        res.redirect(`https://book-haven-r7yg.vercel.app/auth/success?token=${token}`);
     }
 );
 

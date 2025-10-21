@@ -27,7 +27,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: 'https://book-haven-r7yg.vercel.app/',
+    origin: 'https://book-haven-r7yg.vercel.app',
     credentials: true
 }));
 app.use(bodyParser.json());
