@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import UserPreferences from "../components/UserPreferences";
 import Loader from "../components/Loader";
+import ReferralProgram from '../components/ReferralProgram';
 import axios from "axios";
 
 const ProfilePage = () => {
@@ -561,7 +562,12 @@ const ProfilePage = () => {
               )}
             </div>
           )}
-          {activeTab === 'preferences' && <UserPreferences />}
+          {activeTab === 'preferences' && (
+            <div className="space-y-6">
+              <UserPreferences />
+              <ReferralProgram />
+            </div>
+          )}
         </motion.div>
       </div>
     </div>

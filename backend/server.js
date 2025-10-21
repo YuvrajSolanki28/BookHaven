@@ -15,6 +15,7 @@ const googleAuthRoutes = require("./routes/googleAuth");
 const booksRoutes = require("./routes/books");
 const ordersRoutes = require("./routes/orders");
 const wishlistRoutes = require("./routes/wishlist");
+const marketingRoutes = require("./routes/marketing");
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use("/auth", googleAuthRoutes);
 app.use("/api/books", booksRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/marketing", marketingRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);

@@ -29,3 +29,32 @@ exports.sendVerificationEmail = (email, code) => {
     }
   });
 };
+
+const sendOrderConfirmation = async (userEmail, orderDetails) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: userEmail,
+    subject: 'Order Confirmation',
+    html: `<h2>Order Confirmed!</h2><p>Order ID: ${orderDetails.orderId}</p><p>Total: $${orderDetails.total}</p>`
+  });
+};
+
+const sendAbandonedCartEmail = async (userEmail, cartItems) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: userEmail,
+    subject: 'Complete Your Purchase',
+    html: `<h2>You left items in your cart!</h2><p>Don't miss out on ${cartItems.length} books.</p>`
+  });
+};
+
+const sendNewBookNotification = async (userEmail, book) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: userEmail,
+    subject: 'New Book Available',
+    html: `<h2>New Book: ${book.title}</h2><p>By ${book.author}</p><p>Price: $${book.price}</p>`
+  });
+};
+
+module.exports = { sendOrderConfirmation, sendAbandonedCartEmail, sendNewBookNotification };

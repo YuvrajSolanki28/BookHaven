@@ -313,7 +313,4 @@ router.put('/preferences/:userId', async (req, res) => {
   }
 });
 
-
-
-
 module.exports = router;

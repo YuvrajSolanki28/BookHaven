@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PaymentModal from "../components/PaymentModal";
+import CouponInput from '../components/CouponInput';
+import LoyaltyPoints from '../components/LoyaltyPoints';
+import BulkDiscount from '../components/BulkDiscount';
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { X, ShoppingCartIcon, ArrowLeftIcon } from "lucide-react";
@@ -10,11 +13,12 @@ const BookCart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [discount, setDiscount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get cart from localStorage
     const savedCart = localStorage.getItem('bookCart');
     if (savedCart) {
       setCart(JSON.parse(savedCart));
@@ -34,6 +38,8 @@ const BookCart = () => {
 
   const clearCart = () => {
     updateCart([]);
+    setDiscount(0);
+    setFinalAmount(0);
   };
 
   const purchaseBooks = async () => {
@@ -75,17 +81,18 @@ const BookCart = () => {
   };
 
   const totalPrice = cart.reduce((sum, book) => sum + book.price, 0);
+  const displayAmount = finalAmount > 0 ? finalAmount : totalPrice;
 
   if (cart.length === 0) {
     return (
       <div className="min-h-screen py-24 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-4xl px-4 mx-auto">
-          <div className="p-8 text-center bg-white rounded-lg shadow">
+          <div className="p-8 text-center bg-white rounded-lg shadow dark:bg-gray-800">
             <ShoppingCartIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h2 className="mb-2 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
               Your cart is empty
             </h2>
-            <p className="mb-6 text-gray-600">
+            <p className="mb-6 text-gray-600 dark:text-gray-300">
               Start adding some books to your cart!
             </p>
             <button
@@ -101,10 +108,8 @@ const BookCart = () => {
   }
 
   return (
-    <div className="min-h-screen py-24 bg-gray-50 ">
+    <div className="min-h-screen py-24 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl px-4 mx-auto">
-
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
             <button
@@ -114,21 +119,17 @@ const BookCart = () => {
               <ArrowLeftIcon className="w-4 h-4 mr-2" />
               Continue Shopping
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Shopping Cart</h1>
           </div>
-          <span className="text-lg text-gray-600">{cart.length} items</span>
+          <span className="text-lg text-gray-600 dark:text-gray-300">{cart.length} items</span>
         </div>
 
-        <div className="bg-white rounded-lg shadow ">
-
-          {/* Cart Items */}
+        <div className="bg-white rounded-lg shadow dark:bg-gray-800">
           <div className="p-6">
             <div className="space-y-4">
               {cart.map((book) => (
-                <div key={book._id} className="flex items-center gap-4 py-4 border-b last:border-b-0">
-
-                  {/* Book Image */}
-                  <div className="flex-shrink-0 w-20 h-24 overflow-hidden bg-gray-200 rounded">
+                <div key={book._id} className="flex items-center gap-4 py-4 border-b last:border-b-0 dark:border-gray-600">
+                  <div className="flex-shrink-0 w-20 h-24 overflow-hidden bg-gray-200 rounded dark:bg-gray-700">
                     {book.imageUrl ? (
                       <img
                         src={book.imageUrl}
@@ -142,31 +143,28 @@ const BookCart = () => {
                     )}
                   </div>
 
-                  {/* Book Info */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-600">by {book.author}</p>
-                    <p className="text-sm text-gray-500">{book.category}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">by {book.author}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{book.category}</p>
                     {book.isDigital && (
-                      <span className="inline-block px-2 py-1 mt-1 text-xs text-blue-800 bg-blue-100 rounded">
+                      <span className="inline-block px-2 py-1 mt-1 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200">
                         Digital Book
                       </span>
                     )}
                   </div>
 
-                  {/* Price */}
                   <div className="text-right">
                     <p className="text-lg font-semibold text-green-600">
                       ${book.price.toFixed(2)}
                     </p>
                   </div>
 
-                  {/* Remove Button */}
                   <button
                     onClick={() => removeFromCart(book._id)}
-                    className="p-2 text-gray-400 rounded-full hover:bg-gray-100 hover:text-red-500"
+                    className="p-2 text-gray-400 rounded-full hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-700"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -175,19 +173,42 @@ const BookCart = () => {
             </div>
           </div>
 
-          {/* Cart Summary */}
-          <div className="p-6 border-t bg-gray-50">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold text-gray-900">Total</span>
-              <span className="text-2xl font-bold text-green-600">
-                ${totalPrice.toFixed(2)}
-              </span>
+          <div className="p-6 border-t bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            {user && <LoyaltyPoints />}
+            
+            <BulkDiscount cartCount={cart.length} totalAmount={totalPrice} />
+            
+            <CouponInput 
+              totalAmount={totalPrice}
+              onDiscountApplied={(discountAmount, final) => {
+                setDiscount(discountAmount);
+                setFinalAmount(final);
+              }}
+            />
+
+            <div className="mb-4 space-y-2">
+              <div className="flex justify-between text-gray-600 dark:text-gray-300">
+                <span>Subtotal:</span>
+                <span>${totalPrice.toFixed(2)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount:</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-semibold text-gray-900 dark:text-white">
+                <span>Total:</span>
+                <span className="text-2xl font-bold text-green-600">
+                  ${displayAmount.toFixed(2)}
+                </span>
+              </div>
             </div>
 
             <div className="flex gap-4">
               <button
                 onClick={clearCart}
-                className="flex-1 px-6 py-3 font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 px-6 py-3 font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
               >
                 Clear Cart
               </button>
@@ -196,14 +217,15 @@ const BookCart = () => {
                 disabled={loading}
                 className="flex-1 px-6 py-3 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
               >
-                {loading ? 'Processing...' : `Purchase All - $${totalPrice.toFixed(2)}`}
+                {loading ? 'Processing...' : `Purchase All - $${displayAmount.toFixed(2)}`}
               </button>
             </div>
           </div>
+
           <PaymentModal
             isOpen={showPaymentModal}
             onClose={() => setShowPaymentModal(false)}
-            totalAmount={totalPrice}
+            totalAmount={displayAmount}
             onPaymentSuccess={purchaseBooks}
           />
         </div>

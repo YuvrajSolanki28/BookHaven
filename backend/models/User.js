@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { 
-        type: String, 
-        required: function() {
+    password: {
+        type: String,
+        required: function () {
             return this.authProvider === 'local';
         }
     },
@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     verifiedAt: { type: Date },
+    loyaltyPoints: { type: Number, default: 0 },
+    referralCode: { type: String, unique: true, sparse: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     preferences: {
         theme: { type: String, enum: ['light', 'dark', 'auto'], default: 'light' },
         language: { type: String, default: 'en' },
@@ -32,12 +35,12 @@ const userSchema = new mongoose.Schema({
 });
 
 // Check if verification expired (2 weeks)
-userSchema.methods.isVerificationExpired = function() {
+userSchema.methods.isVerificationExpired = function () {
     if (!this.isVerified || !this.verifiedAt) return true;
-    
+
     const twoWeeksAgo = new Date();
     twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-    
+
     return this.verifiedAt < twoWeeksAgo;
 };
 
