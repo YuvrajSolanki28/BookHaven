@@ -27,7 +27,7 @@ function Users() {
         const token = localStorage.getItem('token');
         console.log('Fetching users with token:', token ? 'Token exists' : 'No token');
 
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/admin/users`, {
+        const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/auth/admin/users`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -45,7 +45,7 @@ function Users() {
     const deleteUser = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/auth/admin/users/${deleteModal.userId}`, {
+            await axios.delete(`${import.meta.env.BACKEND_URL}/api/auth/admin/users/${deleteModal.userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(users.filter(u => u._id !== deleteModal.userId));
@@ -59,7 +59,7 @@ function Users() {
     const toggleAdminStatus = async (userId, currentStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/auth/admin/users/${userId}/admin`, 
+            await axios.put(`${import.meta.env.BACKEND_URL}/api/auth/admin/users/${userId}/admin`, 
                 { isAdmin: !currentStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

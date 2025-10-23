@@ -22,7 +22,7 @@ function Booklist() {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.REACT_APP_BACKEND_URL}/api/books`);
+      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books`);
       setBooks(response.data);
     } catch (error) {
       toast.error('Failed to fetch books');

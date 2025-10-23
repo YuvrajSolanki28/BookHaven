@@ -32,8 +32,8 @@ function Dashboard() {
 
         // Use existing routes
         const [booksRes, ordersRes] = await Promise.all([
-            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books`),
-            axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/all-orders`, { headers }) // Use existing route
+            axios.get(`${import.meta.env.BACKEND_URL}/api/books`),
+            axios.get(`${import.meta.env.BACKEND_URL}/api/orders/all-orders`, { headers }) // Use existing route
         ]);
 
         const books = booksRes.data;

@@ -25,7 +25,7 @@ function AddBooks() {
 
     const fetchBooks = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books`);
+            const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books`);
             setBooks(response.data);
         } catch (error) {
             toast.error('Failed to fetch books');
@@ -37,7 +37,7 @@ function AddBooks() {
     const addBook = async (bookData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/books`, bookData, {
+            const response = await axios.post(`${import.meta.env.BACKEND_URL}/api/books`, bookData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks([response.data.book, ...books]);
@@ -50,7 +50,7 @@ function AddBooks() {
     const editBook = async (bookData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/books/${editingBook._id}`, bookData, {
+            const response = await axios.put(`${import.meta.env.BACKEND_URL}/api/books/${editingBook._id}`, bookData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks(books.map(book => book._id === editingBook._id ? response.data.book : book));
@@ -64,7 +64,7 @@ function AddBooks() {
     const deleteBook = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/books/${deleteModal.bookId}`, {
+            await axios.delete(`${import.meta.env.BACKEND_URL}/api/books/${deleteModal.bookId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBooks(books.filter(book => book._id !== deleteModal.bookId));

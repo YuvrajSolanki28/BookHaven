@@ -48,7 +48,7 @@ const BookCart = () => {
       const token = localStorage.getItem('token');
       const bookIds = cart.map(book => book._id);
 
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
+      await axios.post(`${import.meta.env.BACKEND_URL}/api/orders/create`,
         { bookIds },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -37,7 +37,7 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -80,7 +80,7 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verify`, {
+      const response = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: verificationCode }),

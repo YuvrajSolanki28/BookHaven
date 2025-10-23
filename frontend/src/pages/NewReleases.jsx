@@ -21,7 +21,7 @@ function NewReleases() {
   const fetchNewReleases = async () => {
     try {
         // Temporarily get all books sorted by newest first
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books`);
+        const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books`);
         
         // Sort by creation date and take first 12 books
         const sortedBooks = response.data
