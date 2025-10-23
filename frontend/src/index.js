@@ -25,6 +25,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import NewReleases from "./pages/NewReleases";
 import Categories from "./pages/Categories";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 // Layout with Navbar & Footer control
@@ -77,6 +79,8 @@ root.render(
                 <Route path="/mylibrary" element={<MyLibrary />} />
                 <Route path="/new-releases" element={<NewReleases />} />
                 <Route path="/categories" element={<Categories />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/admin/add-books" element={
                   <AdminRoute>
                     <AddBooks />

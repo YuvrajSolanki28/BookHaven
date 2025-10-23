@@ -3,11 +3,12 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/User");
-const { sendVerificationEmail } = require("../utils/sendemail");
+const { sendVerificationEmail, sendPasswordResetEmail  } = require("../utils/sendemail");
+const crypto = require('crypto');
 
+const resetTokens = {};
 const router = express.Router();
 
-// In-memory storage for verification codes (Use Redis or DB for production)
 const verificationCodes = {};
 
 
@@ -48,7 +49,7 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-// Login
+//login
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
@@ -67,13 +68,13 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        // Check if verification expired for local users
-        if (user.authProvider === 'local' && user.isVerificationExpired()) {
-            // Reset verification status
+        // Check for local users with expired verification
+        if (user.authProvider === "local" && typeof user.isVerificationExpired === "function" && user.isVerificationExpired()) {
             user.isVerified = false;
             user.verifiedAt = null;
             await user.save();
 
+            // Generate and send a new code
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             verificationCodes[email] = code;
 
@@ -81,40 +82,46 @@ router.post("/login", async (req, res) => {
                 await sendVerificationEmail(email, code);
             } catch (err) {
                 console.error("Error sending verification email:", err);
+                return res.status(500).json({
+                    error: "Could not send new verification email. Please try again later.",
+                });
             }
 
             return res.status(403).json({
-                error: "Email verification expired. New verification code sent.",
+                error: "Email verification expired. A new verification code was sent.",
             });
         }
 
+        // If the user isn’t verified yet
+        if (user.authProvider === "local" && !user.isVerified) {
+            return res.status(403).json({
+                error: "Email not verified. Please verify your account.",
+            });
+        }
+
+        // Generate JWT token
         const token = jwt.sign(
             { userId: user._id, email: user.email, isAdmin: user.isAdmin },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
 
-        res.json({ 
-            message: "Login successful", 
-            token, 
+        return res.json({
+            message: "Login successful",
+            token,
             user: {
                 id: user._id,
                 fullName: user.fullName,
                 email: user.email,
                 isAdmin: user.isAdmin,
-                isVerified: user.isVerified
-            }
+                isVerified: user.isVerified,
+            },
         });
-
     } catch (error) {
         console.error("Error in login:", error);
-        res.status(500).json({ error: "Server error during login" });
+        return res.status(500).json({ error: "Server error during login" });
     }
 });
-
-
-
-
 
 // Verify code
 router.post("/verify", async (req, res) => {
@@ -166,8 +173,6 @@ router.post("/verify", async (req, res) => {
     }
 });
 
-
-
 //profile
 router.get('/profile/:token', async (req, res) => {
     const { token } = req.params;
@@ -193,7 +198,6 @@ router.get('/profile/:token', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 // Change Password
 router.post("/change-password", async (req, res) => {
@@ -233,6 +237,58 @@ router.post("/change-password", async (req, res) => {
     res.json({ message: "Password updated successfully!" });
   } catch (error) {
     console.error("Error changing password:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Forgot Password
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    const user = await Users.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    resetTokens[resetToken] = { email, expires: Date.now() + 3600000 }; // 1 hour
+
+    await sendPasswordResetEmail(email, resetToken);
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Reset Password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    const tokenData = resetTokens[token];
+    if (!tokenData || tokenData.expires < Date.now()) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    const user = await Users.findOne({ email: tokenData.email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    // Remove used token
+    delete resetTokens[token];
+
+    res.json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error in reset password:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -297,7 +353,7 @@ router.put("/update-profile", async (req, res) => {
 // backend/routes/user.js - Add these routes
 router.get('/preferences/:userId', async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).select('preferences');
+    const user = await Users.findById(req.params.userId).select('preferences');
     res.json(user.preferences || {});
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch preferences' });
@@ -306,7 +362,7 @@ router.get('/preferences/:userId', async (req, res) => {
 
 router.put('/preferences/:userId', async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.params.userId, { preferences: req.body });
+    await Users.findByIdAndUpdate(req.params.userId, { preferences: req.body });
     res.json({ message: 'Preferences updated' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to update preferences' });

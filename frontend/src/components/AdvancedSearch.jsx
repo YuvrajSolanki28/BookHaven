@@ -30,7 +30,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
 
   const fetchSearchHistory = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books/search-history/${user.id}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/search-history/${user.id}`);
       setSearchHistory(response.data);
     } catch (error) {
       console.error('Failed to fetch search history');
@@ -75,7 +75,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
     }
 
     try {
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books/autocomplete?q=${query}&type=${searchType}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/autocomplete?q=${query}&type=${searchType}`);
       setSuggestions(response.data);
     } catch (error) {
       setSuggestions([]);
@@ -108,7 +108,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
 
   const clearHistory = async () => {
     try {
-      await axios.delete(`${import.meta.env.BACKEND_URL}/api/books/search-history/${user.id}`);
+      await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/books/search-history/${user.id}`);
       setSearchHistory([]);
     } catch (error) {
       console.error('Failed to clear search history');
@@ -144,11 +144,11 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search books..."
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
               <button
                 onClick={handleVoiceSearch}
-                className={`px-4 py-3 border-t border-b border-gray-300 ${isListening ? 'bg-red-100 text-red-600' : 'bg-gray-50 text-gray-600'} hover:bg-gray-100`}
+                className={`px-4 py-3 border-t border-b border-gray-300 ${isListening ? 'bg-red-100 text-red-600' : 'bg-gray-50 text-gray-600'} hover:bg-gray-100 dark:bg-gray-600 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-500`}
               >
                 {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
               </button>
@@ -191,7 +191,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
             <select
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             >
               <option value="text">Full Text</option>
               <option value="isbn">ISBN</option>
@@ -227,7 +227,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
                       type="number"
                       value={filters.minPrice}
                       onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                   <div>
@@ -238,7 +238,7 @@ const AdvancedSearch = ({ onSearch, onClose }) => {
                       type="number"
                       value={filters.maxPrice}
                       onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                 </motion.div>

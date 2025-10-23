@@ -1,8 +1,9 @@
 const express = require('express');
 const Book = require('../models/Books');
+const Users = require('../models/User');
 const SearchHistory = require('../models/SearchHistory');
 const jwt = require('jsonwebtoken');
-
+const { sendNewBookNotification } = require('../utils/sendemail');
 
 const router = express.Router();
 
@@ -26,6 +27,13 @@ router.post('/', verifyAdmin, async (req, res) => {
     try {
         const book = new Book(req.body);
         await book.save();
+        
+        // Send notifications to newsletter subscribers
+        const subscribers = await Users.find({ 'preferences.notifications.newReleases': true });
+        subscribers.forEach(user => {
+            sendNewBookNotification(user.email, book).catch(console.error);
+        });
+        
         res.status(201).json({ message: 'Book added successfully', book });
     } catch (error) {
         if (error.code === 11000) {
@@ -293,6 +301,5 @@ router.delete('/search-history/:userId', async (req, res) => {
         res.status(500).json({ error: 'Failed to clear search history' });
     }
 });
-
 
 module.exports = router;

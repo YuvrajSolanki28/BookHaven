@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-exports.sendVerificationEmail = (email, code) => {
+sendVerificationEmail = (email, code) => {
   const mailOptions = {
     from: `"BookHaven" <${process.env.EMAIL_SERVICE}>`,
     to: email,
@@ -30,18 +30,41 @@ exports.sendVerificationEmail = (email, code) => {
   });
 };
 
+const sendPasswordResetEmail = async (email, resetToken) => {
+  await transporter.sendMail({
+    from: "BookHaven",
+    to: email,
+    subject: 'Password Reset',
+    html: `
+      <h2>Password Reset</h2>
+      <p>Click the link below to reset your password:</p>
+      <a href="${process.env.FRONTEND_URL}/reset-password/${resetToken}">Reset Password</a>
+      <p>This link expires in 1 hour.</p>
+    `
+  });
+};
+
 const sendOrderConfirmation = async (userEmail, orderDetails) => {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: "BookHaven",
     to: userEmail,
-    subject: 'Order Confirmation',
-    html: `<h2>Order Confirmed!</h2><p>Order ID: ${orderDetails.orderId}</p><p>Total: $${orderDetails.total}</p>`
+    subject: 'Order Confirmation - BookHaven',
+    html: `
+      <h2>Order Confirmed!</h2>
+      <p><strong>Order ID:</strong> ${orderDetails.orderId}</p>
+      <p><strong>Total Amount:</strong> $${orderDetails.total}</p>
+      <p><strong>Books:</strong></p>
+      <ul>
+        ${orderDetails.books?.map(book => `<li>${book.title} - $${book.price}</li>`).join('') || ''}
+      </ul>
+      <p>Thank you for your purchase!</p>
+    `
   });
 };
 
 const sendAbandonedCartEmail = async (userEmail, cartItems) => {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: "BookHaven",
     to: userEmail,
     subject: 'Complete Your Purchase',
     html: `<h2>You left items in your cart!</h2><p>Don't miss out on ${cartItems.length} books.</p>`
@@ -50,11 +73,18 @@ const sendAbandonedCartEmail = async (userEmail, cartItems) => {
 
 const sendNewBookNotification = async (userEmail, book) => {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: "BookHaven",
     to: userEmail,
-    subject: 'New Book Available',
-    html: `<h2>New Book: ${book.title}</h2><p>By ${book.author}</p><p>Price: $${book.price}</p>`
+    subject: 'New Book Available - BookHaven',
+    html: `
+      <h2>New Book: ${book.title}</h2>
+      <p><strong>Author:</strong> ${book.author}</p>
+      <p><strong>Category:</strong> ${book.category}</p>
+      <p><strong>Price:</strong> $${book.price}</p>
+      ${book.description ? `<p><strong>Description:</strong> ${book.description}</p>` : ''}
+      <p>Check it out now!</p>
+    `
   });
 };
 
-module.exports = { sendOrderConfirmation, sendAbandonedCartEmail, sendNewBookNotification };
+module.exports = { sendOrderConfirmation, sendAbandonedCartEmail, sendNewBookNotification, sendVerificationEmail, sendPasswordResetEmail };

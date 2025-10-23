@@ -78,7 +78,7 @@ const BookDetailsPage = () => {
       const token = localStorage.getItem('token');
 
       await axios.post(
-        `${import.meta.REACT_APP_BACKEND_URL}/api/orders/create`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
         { bookIds: [book._id] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -100,7 +100,7 @@ const BookDetailsPage = () => {
       const token = localStorage.getItem('token');
 
       const response = await axios.get(
-        `${import.meta.REACT_APP_BACKEND_URL}/api/orders/download/${book._id}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/orders/download/${book._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
@@ -157,7 +157,7 @@ const BookDetailsPage = () => {
 
       await axios({
         method,
-        url: `${import.meta.REACT_APP_BACKEND_URL}/api/wishlist`,
+        url: `${process.env.REACT_APP_BACKEND_URL}/api/wishlist`,
         data: { bookId: book._id },
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -2,6 +2,7 @@ const express = require('express');
 const Order = require('../models/Order');
 const Book = require('../models/Books');
 const jwt = require('jsonwebtoken');
+const { sendOrderConfirmation } = require('../utils/sendemail');
 
 
 const router = express.Router();
@@ -20,7 +21,7 @@ const verifyUser = (req, res, next) => {
     }
 };
 
-// Create order (simulate payment)
+// Create order
 router.post('/create', verifyUser, async (req, res) => {
     try {
         const { bookIds } = req.body;
@@ -47,6 +48,16 @@ router.post('/create', verifyUser, async (req, res) => {
 
         await order.save();
         res.json({ message: 'Order created successfully', orderId: order._id });
+
+        // Send order confirmation email
+        await sendOrderConfirmation(req.user.email, {
+            orderId: order._id,
+            total: totalAmount,
+            books: books.map(book => ({
+                title: book.title,
+                price: book.price
+            }))
+        });
     } catch (error) {
         res.status(500).json({ error: 'Failed to create order' });
     }
