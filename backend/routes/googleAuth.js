@@ -61,7 +61,7 @@ router.get('/google/callback',
             { expiresIn: '7d' }
         );
 
-        res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+        res.redirect(`${process.env.FRONTEND_URL}/auth/success?token=${token}`);
     }
 );
 
