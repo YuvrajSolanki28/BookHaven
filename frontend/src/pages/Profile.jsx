@@ -50,7 +50,7 @@ const ProfilePage = () => {
   const fetchWishlist = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/wishlist`, {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWishlist(response.data);
@@ -72,7 +72,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `${import.meta.env.BACKEND_URL}/api/auth/update-profile`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/update-profile`,
         { fullName: editName, email: editEmail, password: editPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +93,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${import.meta.env.BACKEND_URL}/api/auth/change-password`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/change-password`,
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -109,7 +109,7 @@ const ProfilePage = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/orders/my-orders`, {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/my-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(response.data);

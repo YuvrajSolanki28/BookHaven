@@ -15,7 +15,7 @@ const AdminLogin = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/admin/login`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials)

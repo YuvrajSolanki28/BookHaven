@@ -23,7 +23,7 @@ const BookDetailsPage = () => {
   const fetchBook = useCallback(async () => {
     if (!id) return;
     try {
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/books/${id}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/books/${id}`);
       setBook(response.data);
     } catch (error) {
       toast.error('Book not found');
@@ -41,7 +41,7 @@ const BookDetailsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/orders/my-orders`, {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/my-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

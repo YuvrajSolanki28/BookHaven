@@ -30,7 +30,7 @@ const UserPreferences = () => {
 
   const fetchPreferences = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/user/preferences/${user.id}`);
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/preferences/${user.id}`);
       setPreferences(prev => ({ ...prev, ...response.data }));
     } catch (error) {
       console.error('Failed to fetch preferences');
@@ -40,7 +40,7 @@ const UserPreferences = () => {
   const savePreferences = async () => {
     setLoading(true);
     try {
-      await axios.put(`${import.meta.env.BACKEND_URL}/api/user/preferences/${user.id}`, preferences);
+      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/user/preferences/${user.id}`, preferences);
       toast.success('Preferences saved');
     } catch (error) {
       toast.error('Failed to save preferences');

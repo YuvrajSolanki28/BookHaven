@@ -3,6 +3,9 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const Users = require('../models/User');
+require('dotenv').config();
+
+
 
 const router = express.Router();
 
@@ -57,8 +60,8 @@ router.get('/google/callback',
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-        
-        res.redirect(`https://book-haven-r7yg.vercel.app/auth/success?token=${token}`);
+
+        res.redirect(`http://localhost:3000/auth/success?token=${token}`);
     }
 );
 
