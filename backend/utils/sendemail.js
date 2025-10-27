@@ -4,14 +4,15 @@ require("dotenv").config();
 
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
+  service: 'gmail',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_SERVICE,
-    pass: process.env.EMAIL_PASSWORD,
-  },
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
 });
+
 
 transporter.verify((error, success) => {
   if (error) console.error('Email error:', error);
@@ -19,21 +20,20 @@ transporter.verify((error, success) => {
 });
 
 
-sendVerificationEmail = (email, code) => {
-  const mailOptions = {
-    from: `"BookHaven" <${process.env.EMAIL_SERVICE}>`,
+sendVerificationEmail = async (email, code) => {
+  try{
+  await transporter.sendMail({
+    from: `"BookHaven" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Your Verification Code",
     text: `Your verification code is:`,
     html: Verification_Email_Template.replace("{code}", code)
-  };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("❌ Error sending email:", error);
-    } else {
-      
-    }
   });
+   console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Email error:', error);
+    throw error;
+  }
 };
 
 const sendPasswordResetEmail = async (email, resetToken) => {
