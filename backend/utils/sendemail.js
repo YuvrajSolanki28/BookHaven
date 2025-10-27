@@ -19,7 +19,6 @@ require("dotenv").config();
 //   socketTimeout: 60000
 // });
 
-
 const transporter = nodemailer.createTransport({
   host: 'smtp.sendgrid.net',
   port: 587,
