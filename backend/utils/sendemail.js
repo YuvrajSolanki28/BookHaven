@@ -3,7 +3,7 @@ const  {Verification_Email_Template}  = require("./Template");
 require("dotenv").config();
 
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,
