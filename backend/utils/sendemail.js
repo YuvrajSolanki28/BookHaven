@@ -13,6 +13,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((error, success) => {
+  if (error) console.error('Email error:', error);
+  else console.log('Ready to send emails!');
+});
+
+
 sendVerificationEmail = (email, code) => {
   const mailOptions = {
     from: `"BookHaven" <${process.env.EMAIL_SERVICE}>`,
