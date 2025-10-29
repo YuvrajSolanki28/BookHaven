@@ -3,7 +3,10 @@ const  {Verification_Email_Template}  = require("./Template");
 const sgMail  = require("@sendgrid/mail");
 require("dotenv").config();
 
+// use SendGrid API for sending emails
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+
 //this code is for gmail SMTP
 // const transporter = nodemailer.createTransport({
 //   service: 'gmail',
@@ -12,18 +15,6 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 //     pass: process.env.EMAIL_PASS
 //   }
 // });
-
-
-// const transporter = sendgrid.createTransport({
-//   host: 'smtp.sendgrid.net',
-//   port: 587,
-//   secure: false,
-//   auth: {
-//     user: 'apikey',
-//     pass: process.env.SENDGRID_API_KEY
-//   }
-// });
-
 
 // transporter.verify((error, success) => {
 //   if (error) console.error('Email error:', error);
@@ -48,8 +39,8 @@ sendVerificationEmail = async (email, code) => {
 };
 
 const sendPasswordResetEmail = async (email, resetToken) => {
-  await transporter.sendMail({
-    from: "BookHaven",
+  await sgMail.send({
+    from: "yuvrajsolanki2809@gmail.com",
     to: email,
     subject: 'Password Reset',
     html: `
@@ -62,8 +53,8 @@ const sendPasswordResetEmail = async (email, resetToken) => {
 };
 
 const sendOrderConfirmation = async (userEmail, orderDetails) => {
-  await transporter.sendMail({
-    from: "BookHaven",
+  await sgMail.send({
+    from: "yuvrajsolanki2809@gmail.com",
     to: userEmail,
     subject: 'Order Confirmation - BookHaven',
     html: `
@@ -80,8 +71,8 @@ const sendOrderConfirmation = async (userEmail, orderDetails) => {
 };
 
 const sendAbandonedCartEmail = async (userEmail, cartItems) => {
-  await transporter.sendMail({
-    from: "BookHaven",
+  await sgMail.send({
+    from: "yuvrajsolanki2809@gmail.com",
     to: userEmail,
     subject: 'Complete Your Purchase',
     html: `<h2>You left items in your cart!</h2><p>Don't miss out on ${cartItems.length} books.</p>`
@@ -89,8 +80,8 @@ const sendAbandonedCartEmail = async (userEmail, cartItems) => {
 };
 
 const sendNewBookNotification = async (userEmail, book) => {
-  await transporter.sendMail({
-    from: "BookHaven",
+  await sgMail.send({
+    from: "yuvrajsolanki2809@gmail.com",
     to: userEmail,
     subject: 'New Book Available - BookHaven',
     html: `
