@@ -1,7 +1,9 @@
 const nodemailer = require("nodemailer");
 const  {Verification_Email_Template}  = require("./Template");
+const sgMail  = require("@sendgrid/mail");
 require("dotenv").config();
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 //this code is for gmail SMTP
 // const transporter = nodemailer.createTransport({
 //   service: 'gmail',
@@ -12,26 +14,26 @@ require("dotenv").config();
 // });
 
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'apikey',
-    pass: process.env.SENDGRID_API_KEY
-  }
-});
+// const transporter = sendgrid.createTransport({
+//   host: 'smtp.sendgrid.net',
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: 'apikey',
+//     pass: process.env.SENDGRID_API_KEY
+//   }
+// });
 
 
-transporter.verify((error, success) => {
-  if (error) console.error('Email error:', error);
-  else console.log('Ready to send emails!');
-});
+// transporter.verify((error, success) => {
+//   if (error) console.error('Email error:', error);
+//   else console.log('Ready to send emails!');
+// });
 
 
 sendVerificationEmail = async (email, code) => {
   try{
-  await transporter.sendMail({
+  await sgMail.send({
     from: `yuvrajsolanki2809@gmail.com`,
     to: email,
     subject: "Your Verification Code",
