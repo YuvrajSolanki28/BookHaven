@@ -2,32 +2,25 @@ const nodemailer = require("nodemailer");
 const  {Verification_Email_Template}  = require("./Template");
 require("dotenv").config();
 
-// this code is for gmail SMTP
+//this code is for gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+
 // const transporter = nodemailer.createTransport({
-//   host: 'smtp.gmail.com',
+//   host: 'smtp.sendgrid.net',
 //   port: 587,
 //   secure: false,
 //   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS
-//   },
-//   tls: {
-//     rejectUnauthorized: false
-//   },
-//   connectionTimeout: 60000,
-//   greetingTimeout: 30000,
-//   socketTimeout: 60000
+//     user: 'apikey',
+//     pass: process.env.SENDGRID_API_KEY
+//   }
 // });
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'apikey',
-    pass: process.env.SENDGRID_API_KEY
-  }
-});
 
 
 transporter.verify((error, success) => {
@@ -39,7 +32,7 @@ transporter.verify((error, success) => {
 sendVerificationEmail = async (email, code) => {
   try{
   await transporter.sendMail({
-    from: `yuvrajsolanki2809@gmail.com`,
+    from: `BookHaven <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Your Verification Code",
     text: `Your verification code is:`,
