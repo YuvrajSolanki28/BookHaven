@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const  {Verification_Email_Template}  = require("./Template");
+const { Forgetpassword_Email_Template } = require('./Template');
 const sgMail  = require("@sendgrid/mail");
 require("dotenv").config();
 
@@ -39,18 +40,25 @@ sendVerificationEmail = async (email, code) => {
 };
 
 const sendPasswordResetEmail = async (email, resetToken) => {
-  await sgMail.send({
-    from: "yuvrajsolanki2809@gmail.com",
-    to: email,
-    subject: 'Password Reset',
-    html: `
-      <h2>Password Reset</h2>
-      <p>Click the link below to reset your password:</p>
-      <a href="${process.env.FRONTEND_URL}/reset-password/${resetToken}">Reset Password</a>
-      <p>This link expires in 1 hour.</p>
-    `
-  });
+  try {
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    const emailContent = Forgetpassword_Email_Template.replace(/{resetUrl}/g, resetUrl);
+    
+    await sgMail.send({
+      to: email,
+      from: 'yuvrajsolanki2809@gmail.com',
+      subject: 'Reset Your Password - BookHaven',
+      html: emailContent
+    });
+    
+    console.log('Password reset email sent successfully');
+  } catch (error) {
+    console.error('Password reset email error:', error);
+    throw error;
+  }
 };
+
+
 
 const sendOrderConfirmation = async (userEmail, orderDetails) => {
   await sgMail.send({
