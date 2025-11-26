@@ -1,2 +1,0 @@
-pading:
-fix UI pages
