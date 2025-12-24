@@ -71,7 +71,7 @@ const BookDetailsPage = () => {
     }
     setShowPaymentModal(true);
   };
-
+// this button use for handle payment success
   const handlePaymentSuccess = async () => {
     try {
       setActionLoading(true);
@@ -93,7 +93,7 @@ const BookDetailsPage = () => {
     }
   };
 
-
+// this button use for handle downoad pdf
   const handleDownload = async () => {
     try {
       setActionLoading(true);
