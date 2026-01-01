@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import PaymentModal from '../components/PaymentModal';
+import EnhancedPaymentModal from '../components/EnhancedPaymentModal';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { ShoppingCartIcon, DownloadIcon, ArrowLeftIcon, ShareIcon, HeartIcon } from 'lucide-react';
@@ -41,6 +41,11 @@ const BookDetailsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/orders/my-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -64,36 +69,52 @@ const BookDetailsPage = () => {
     }
   }, [book, fetchBook, checkIfPurchased]);
 
-  const handlePurchase = async () => {
+  const handlePurchaseClick = async () => {
     if (!user) {
       toast.error('Please login to purchase');
+      navigate('/login');
       return;
     }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please login again');
+      navigate('/login');
+      return;
+    }
+
+    // Just show payment modal, don't create order yet
     setShowPaymentModal(true);
   };
-// this button use for handle payment success
-  const handlePaymentSuccess = async () => {
+
+  const handlePaymentSuccess = async (paymentData) => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem('token');
 
+      // Create order only after successful payment
       await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
-        { bookIds: [book._id] },
+        { 
+          bookIds: [book._id],
+          totalAmount: book.price,
+          paymentStatus: 'completed'
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Purchase successful!');
+      toast.success('Payment successful! Check My Library');
       setPurchased(true);
+      setShowPaymentModal(false);
+      navigate('/mylibrary');
     } catch (error) {
-      console.error('Purchase failed:', error);
-      toast.error('Purchase failed. Please try again.');
+      console.error('Order creation failed:', error);
+      toast.error('Payment successful but order creation failed. Please contact support.');
     } finally {
       setActionLoading(false);
     }
   };
 
-// this button use for handle downoad pdf
   const handleDownload = async () => {
     try {
       setActionLoading(true);
@@ -133,15 +154,19 @@ const BookDetailsPage = () => {
     };
 
     try {
-      if (navigator.share) {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
-      } else {
+      } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(window.location.href);
         toast.success('Link copied to clipboard!');
+      } else {
+        toast.error('Share not supported');
       }
     } catch (error) {
       console.error('Share failed:', error);
-      toast.error('Share failed');
+      if (error.name !== 'AbortError') {
+        toast.error('Share failed');
+      }
     }
   };
 
@@ -169,10 +194,19 @@ const BookDetailsPage = () => {
     }
   };
 
-
   if (loading || !book) {
     return <Loader />;
   }
+
+  // Create mock order for payment modal
+  const mockOrder = {
+    _id: 'temp_order',
+    books: [{
+      title: book.title,
+      price: book.price
+    }],
+    totalAmount: book.price
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -238,7 +272,6 @@ const BookDetailsPage = () => {
               {isLiked ? 'Remove from Wishlist' : 'Add to Wishlist'}
             </button>
 
-
             <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
               <div className="grid grid-cols-1 gap-3 text-sm">
                 {book.category && (
@@ -287,7 +320,7 @@ const BookDetailsPage = () => {
                 </button>
               ) : (
                 <button
-                  onClick={handlePurchase}
+                  onClick={handlePurchaseClick}
                   disabled={actionLoading}
                   className="flex items-center justify-center w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
@@ -320,13 +353,13 @@ const BookDetailsPage = () => {
             </div>
           </motion.div>
         )}
-        <PaymentModal
+
+        <EnhancedPaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
-          totalAmount={book.price}
+          order={mockOrder}
           onPaymentSuccess={handlePaymentSuccess}
         />
-
       </main>
     </div>
   );

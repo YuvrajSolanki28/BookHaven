@@ -1,7 +1,12 @@
 import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Route, Routes, useLocation, } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -18,7 +23,7 @@ import ProfilePage from "./pages/Profile";
 import Loader from "./components/Loader";
 import AdminRoute from "./components/AdmineRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AuthSuccess from './pages/AuthSuccess';
+import AuthSuccess from "./pages/AuthSuccess";
 import MyLibrary from "./pages/MyLibrary";
 import AddBooks from "./pages/admin/add_books";
 import Dashboard from "./pages/admin/Dashboard";
@@ -27,7 +32,7 @@ import NewReleases from "./pages/NewReleases";
 import Categories from "./pages/Categories";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-
+import AdminSettings from "./pages/admin/AdminSettings";
 
 // Layout with Navbar & Footer control
 const Layout = ({ children }) => {
@@ -38,14 +43,17 @@ const Layout = ({ children }) => {
     location.pathname === "/admin" ||
     location.pathname === "/admin/add-books" ||
     location.pathname === "/admin/users" ||
+    location.pathname === "/admin/settings" ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/verify";
 
   const hideFooter =
-    location.pathname === "/cart" || location.pathname === "/profile" || location.pathname === "/mylibrary";
+    location.pathname === "/cart" ||
+    location.pathname === "/profile" ||
+    location.pathname === "/mylibrary";
 
-    const isAdminPage = location.pathname.startsWith("/admin");
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
     <div className={isAdminPage ? "" : ""}>
@@ -80,26 +88,42 @@ root.render(
                 <Route path="/new-releases" element={<NewReleases />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />
-                <Route path="/admin/add-books" element={
-                  <AdminRoute>
-                    <AddBooks />
-                  </AdminRoute>
-                }
+                <Route
+                  path="/reset-password/:token"
+                  element={<ResetPassword />}
                 />
-                <Route path="/admin" element={
-                  <AdminRoute>
-                    <Dashboard />
-                  </AdminRoute>
-                }
+                <Route
+                  path="/admin/add-books"
+                  element={
+                    <AdminRoute>
+                      <AddBooks />
+                    </AdminRoute>
+                  }
                 />
-                <Route path="/admin/users" element={
-                  <AdminRoute>
-                    <Users />
-                  </AdminRoute>
-                }
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <Dashboard />
+                    </AdminRoute>
+                  }
                 />
-
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminRoute>
+                      <Users />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/settings"
+                  element={
+                    <AdminRoute>
+                      <AdminSettings />
+                    </AdminRoute>
+                  }
+                />
               </Routes>
             </Layout>
           </ThemeProvider>

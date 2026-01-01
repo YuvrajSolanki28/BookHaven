@@ -103,4 +103,50 @@ const sendNewBookNotification = async (userEmail, book) => {
   });
 };
 
-module.exports = { sendOrderConfirmation, sendAbandonedCartEmail, sendNewBookNotification, sendVerificationEmail, sendPasswordResetEmail };
+const sendBillEmail = async (userEmail, billData) => {
+    try {
+        const { Bill_Email_Template } = require('./Template');
+        
+        // Calculate tax and totals
+        const subtotal = billData.books.reduce((sum, book) => sum + book.price, 0);
+        const tax = subtotal * 0.08; // 8% tax
+        const total = subtotal + tax;
+        
+        // Generate book items HTML
+        const bookItems = billData.books.map(book => `
+            <tr>
+                <td style="padding:12px 15px; border-bottom:1px solid #e2e8f0; color:#374151;">${book.title}</td>
+                <td style="padding:12px 15px; text-align:center; border-bottom:1px solid #e2e8f0; color:#374151;">1</td>
+                <td style="padding:12px 15px; text-align:right; border-bottom:1px solid #e2e8f0; color:#374151;">$${book.price.toFixed(2)}</td>
+            </tr>
+        `).join('');
+        
+        // Replace template variables
+        const emailContent = Bill_Email_Template
+            .replace('{customerName}', billData.customerName)
+            .replace('{customerEmail}', billData.customerEmail)
+            .replace('{invoiceNumber}', `INV-${billData.orderId.slice(-8)}`)
+            .replace('{orderId}', billData.orderId)
+            .replace('{orderDate}', new Date(billData.orderDate).toLocaleDateString())
+            .replace('{paymentStatus}', billData.paymentStatus)
+            .replace('{bookItems}', bookItems)
+            .replace('${subtotal}', subtotal.toFixed(2))
+            .replace('${tax}', tax.toFixed(2))
+            .replace('${total}', total.toFixed(2))
+            .replace('{libraryUrl}', `${process.env.FRONTEND_URL}/mylibrary`);
+
+        await sgMail.send({
+            from: "yuvrajsolanki2809@gmail.com",
+            to: userEmail,
+            subject: `Invoice #INV-${billData.orderId.slice(-8)} - BookHaven`,
+            html: emailContent
+        });
+
+        console.log('Bill email sent successfully');
+    } catch (error) {
+        console.error('Bill email error:', error);
+        throw error;
+    }
+};
+
+module.exports = { sendOrderConfirmation, sendAbandonedCartEmail, sendNewBookNotification, sendVerificationEmail, sendPasswordResetEmail, sendBillEmail };

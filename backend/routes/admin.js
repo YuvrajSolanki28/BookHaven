@@ -115,4 +115,68 @@ router.put("/users/:id/admin", verifyAdmin, async (req, res) => {
     }
 });
 
+let adminSettings = {
+    siteName: 'BookHaven',
+    siteDescription: 'Your favorite online bookstore',
+    adminEmail: 'admin@bookhaven.com',
+    maxOrdersPerDay: 100,
+    enableRegistration: true,
+    requireEmailVerification: true,
+    defaultShippingCost: 5.99,
+    freeShippingThreshold: 50,
+    taxRate: 0.08,
+    enableCoupons: true,
+    enableWishlist: true,
+    enableReviews: true
+};
+
+// Get admin settings
+router.get("/settings", verifyAdmin, async (req, res) => {
+    try {
+        res.json(adminSettings);
+    } catch (error) {
+        console.error("Error fetching settings:", error);
+        res.status(500).json({ error: "Failed to fetch settings" });
+    }
+});
+
+// Update admin settings
+router.put("/settings", verifyAdmin, async (req, res) => {
+    try {
+        adminSettings = { ...adminSettings, ...req.body };
+        res.json({ message: "Settings updated successfully", settings: adminSettings });
+    } catch (error) {
+        console.error("Error updating settings:", error);
+        res.status(500).json({ error: "Failed to update settings" });
+    }
+});
+
+// Get system stats for dashboard
+router.get("/stats", verifyAdmin, async (req, res) => {
+    try {
+        const Books = require("../models/Books");
+        const Order = require("../models/Order");
+        
+        const [totalBooks, totalOrders] = await Promise.all([
+            Books.countDocuments(),
+            Order.countDocuments()
+        ]);
+
+        const orders = await Order.find();
+        const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+        const uniqueUsers = [...new Set(orders.map(order => order.userId))].length;
+
+        res.json({
+            totalBooks,
+            totalUsers: uniqueUsers,
+            totalOrders,
+            totalRevenue,
+            settings: adminSettings
+        });
+    } catch (error) {
+        console.error("Error fetching stats:", error);
+        res.status(500).json({ error: "Failed to fetch stats" });
+    }
+});
+
 module.exports = router;

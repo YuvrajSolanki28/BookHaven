@@ -42,34 +42,35 @@ router.post('/create', verifyUser, async (req, res) => {
                 pdfUrl: book.pdfUrl
             })),
             totalAmount,
-            paymentStatus: 'completed', // Simulate successful payment
+            paymentStatus: 'completed',
             paymentId: 'pay_' + Date.now()
         });
 
         await order.save();
-        res.json({ message: 'Order created successfully', orderId: order._id });
 
-        // Send order confirmation email
-        await sendOrderConfirmation(req.user.email, {
-            orderId: order._id,
-            total: totalAmount,
+        // Get user details for bill
+        const User = require('../models/User');
+        const user = await User.findById(req.user.userId);
+
+        // Send bill email
+        const { sendBillEmail } = require('../utils/sendemail');
+        await sendBillEmail(user.email, {
+            customerName: user.fullName,
+            customerEmail: user.email,
+            orderId: order._id.toString(),
+            orderDate: order.orderDate,
+            paymentStatus: 'Completed',
             books: books.map(book => ({
                 title: book.title,
                 price: book.price
             }))
         });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create order' });
-    }
-});
 
-// Get user orders
-router.get('/my-orders', verifyUser, async (req, res) => {
-    try {
-        const orders = await Order.find({ userId: req.user.userId }).sort({ orderDate: -1 });
-        res.json(orders);
+        res.json({ message: 'Order created successfully', orderId: order._id });
+
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch orders' });
+        console.error('Order creation error:', error);
+        res.status(500).json({ error: 'Failed to create order' });
     }
 });
 
@@ -108,5 +109,14 @@ router.get('/all-orders', verifyUser, async (req, res) => {
     }
 });
 
+// Get user orders
+router.get('/my-orders', verifyUser, async (req, res) => {
+    try {
+        const orders = await Order.find({ userId: req.user.userId }).sort({ orderDate: -1 });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+});
 
 module.exports = router;

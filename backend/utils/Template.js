@@ -141,3 +141,140 @@ module.exports.Forgetpassword_Email_Template = `
   </body>
 </html>
 `;
+
+module.exports.Bill_Email_Template = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookHaven Invoice</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f5f5f5; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;">
+        <tr>
+            <td align="center" style="padding:20px;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color:#2563eb; padding:30px; text-align:center; border-radius:8px 8px 0 0;">
+                            <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:bold;">BookHaven</h1>
+                            <p style="color:#e0e7ff; margin:5px 0 0 0; font-size:16px;">Invoice & Receipt</p>
+                        </td>
+                    </tr>
+
+                    <!-- Invoice Details -->
+                    <tr>
+                        <td style="padding:30px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="50%">
+                                        <h3 style="color:#333; margin:0 0 10px 0;">Bill To:</h3>
+                                        <p style="margin:0; color:#666; line-height:1.5;">
+                                            {customerName}<br>
+                                            {customerEmail}
+                                        </p>
+                                    </td>
+                                    <td width="50%" style="text-align:right;">
+                                        <h3 style="color:#333; margin:0 0 10px 0;">Invoice Details:</h3>
+                                        <p style="margin:0; color:#666; line-height:1.5;">
+                                            <strong>Invoice #:</strong> {invoiceNumber}<br>
+                                            <strong>Order ID:</strong> {orderId}<br>
+                                            <strong>Date:</strong> {orderDate}<br>
+                                            <strong>Payment:</strong> {paymentStatus}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Items Table -->
+                    <tr>
+                        <td style="padding:0 30px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                                <thead>
+                                    <tr style="background-color:#f8fafc;">
+                                        <th style="padding:15px; text-align:left; border-bottom:2px solid #e2e8f0; color:#374151; font-weight:600;">Book Title</th>
+                                        <th style="padding:15px; text-align:center; border-bottom:2px solid #e2e8f0; color:#374151; font-weight:600;">Qty</th>
+                                        <th style="padding:15px; text-align:right; border-bottom:2px solid #e2e8f0; color:#374151; font-weight:600;">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {bookItems}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Total Section -->
+                    <tr>
+                        <td style="padding:30px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="70%"></td>
+                                    <td width="30%">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding:8px 0; border-bottom:1px solid #e2e8f0;">
+                                                    <strong style="color:#374151;">Subtotal:</strong>
+                                                </td>
+                                                <td style="padding:8px 0; text-align:right; border-bottom:1px solid #e2e8f0;">
+                                                    <strong style="color:#374151;">\${subtotal}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:8px 0; border-bottom:1px solid #e2e8f0;">
+                                                    <span style="color:#6b7280;">Tax (8%):</span>
+                                                </td>
+                                                <td style="padding:8px 0; text-align:right; border-bottom:1px solid #e2e8f0;">
+                                                    <span style="color:#6b7280;">\${tax}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:15px 0; border-bottom:2px solid #2563eb;">
+                                                    <strong style="color:#1f2937; font-size:18px;">Total:</strong>
+                                                </td>
+                                                <td style="padding:15px 0; text-align:right; border-bottom:2px solid #2563eb;">
+                                                    <strong style="color:#2563eb; font-size:18px;">\${total}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Download Section -->
+                    <tr>
+                        <td style="padding:30px; background-color:#f8fafc; border-radius:0 0 8px 8px;">
+                            <h3 style="color:#333; margin:0 0 15px 0; text-align:center;">Your Digital Books</h3>
+                            <p style="color:#666; text-align:center; margin:0 0 20px 0;">
+                                Your purchased books are now available in your library. You can download them anytime from your account.
+                            </p>
+                            <div style="text-align:center;">
+                                <a href="{libraryUrl}" style="display:inline-block; padding:12px 30px; background-color:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600;">
+                                    Access My Library
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:20px 30px; text-align:center; color:#6b7280; font-size:12px; line-height:1.5;">
+                            Thank you for your purchase!<br>
+                            BookHaven - Your Digital Bookstore<br>
+                            If you have any questions, contact us at support@bookhaven.com
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`;

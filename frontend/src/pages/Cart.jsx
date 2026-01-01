@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import PaymentModal from "../components/PaymentModal";
+import EnhancedPaymentModal from "../components/EnhancedPaymentModal";
 import CouponInput from '../components/CouponInput';
 import LoyaltyPoints from '../components/LoyaltyPoints';
 import BulkDiscount from '../components/BulkDiscount';
@@ -13,6 +13,7 @@ const BookCart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0);
   const { user } = useAuth();
@@ -42,30 +43,35 @@ const BookCart = () => {
     setFinalAmount(0);
   };
 
-  const purchaseBooks = async () => {
-    setLoading(true);
+  const createOrder = async () => {
     try {
       const token = localStorage.getItem('token');
       const bookIds = cart.map(book => book._id);
+      const totalPrice = finalAmount > 0 ? finalAmount : cart.reduce((sum, book) => sum + book.price, 0);
 
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
-        { bookIds },
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/orders/create`,
+        { 
+          bookIds,
+          totalAmount: totalPrice,
+          paymentStatus: 'pending'
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Purchase successful! Check My Library');
-      clearCart();
-      setShowPaymentModal(false);
-      navigate('/mylibrary');
+      return {
+        _id: response.data.orderId,
+        books: cart.map(book => ({
+          title: book.title,
+          price: book.price
+        })),
+        totalAmount: totalPrice
+      };
     } catch (error) {
-      console.error('Purchase error:', error);
-      toast.error(error.response?.data?.error || 'Purchase failed');
-    } finally {
-      setLoading(false);
+      throw new Error(error.response?.data?.error || 'Failed to create order');
     }
   };
 
-  const handlePurchaseClick = () => {
+  const handlePurchaseClick = async () => {
     if (!user) {
       toast.error('Please login to purchase');
       navigate('/login');
@@ -77,7 +83,24 @@ const BookCart = () => {
       return;
     }
 
-    setShowPaymentModal(true);
+    setLoading(true);
+    try {
+      const order = await createOrder();
+      setCurrentOrder(order);
+      setShowPaymentModal(true);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = (paymentData) => {
+    toast.success('Payment successful! Check My Library');
+    clearCart();
+    setShowPaymentModal(false);
+    setCurrentOrder(null);
+    navigate('/mylibrary');
   };
 
   const totalPrice = cart.reduce((sum, book) => sum + book.price, 0);
@@ -222,12 +245,17 @@ const BookCart = () => {
             </div>
           </div>
 
-          <PaymentModal
-            isOpen={showPaymentModal}
-            onClose={() => setShowPaymentModal(false)}
-            totalAmount={displayAmount}
-            onPaymentSuccess={purchaseBooks}
-          />
+          {currentOrder && (
+            <EnhancedPaymentModal
+              isOpen={showPaymentModal}
+              onClose={() => {
+                setShowPaymentModal(false);
+                setCurrentOrder(null);
+              }}
+              order={currentOrder}
+              onPaymentSuccess={handlePaymentSuccess}
+            />
+          )}
         </div>
       </div>
     </div>

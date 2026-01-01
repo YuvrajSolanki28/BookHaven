@@ -16,6 +16,7 @@ const booksRoutes = require("./routes/books");
 const ordersRoutes = require("./routes/orders");
 const wishlistRoutes = require("./routes/wishlist");
 const marketingRoutes = require("./routes/marketing");
+const paymentRoutes = require("./routes/payments");
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use("/api/books", booksRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/marketing", marketingRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
