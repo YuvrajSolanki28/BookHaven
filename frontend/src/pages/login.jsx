@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
 import  GoogleLoginButton  from '../components/GoogleLoginButton';
 import { setAuthData } from '../utils/auth';
+import { loginUser, verifyUserEmail } from '../utils/loginApi';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -31,34 +32,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate) return;
+    if (!validate()) return;
 
     setLoading(true);
     setErrors({});
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const result = await loginUser({ email, password });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setAuthData(data.token, data.user);
+      if (result.ok) {
+        setAuthData(result.data.token, result.data.user);
         notifySuccess('Login successful!');
         setTimeout(() => {
           navigate('/');
           window.location.reload();
         }, 1000);
-      } else if (response.status === 403) {
+      } else if (result.status === 403) {
         notifySuccess('Please verify your email to continue');
         setShowVerification(true);
       } else {
-        const errorMessage = data.message || data.error || 'Login failed';
-        setErrors({ api: errorMessage });
-        notifyError(errorMessage);
+        setErrors({ api: result.errorMessage });
+        notifyError(result.errorMessage);
       }
     } catch (err) {
       const errorMessage = 'Network error. Please try again.';
@@ -80,25 +74,18 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: verificationCode }),
-      });
+      const result = await verifyUserEmail({ email, code: verificationCode });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setAuthData(data.token, data.user);
+      if (result.ok) {
+        setAuthData(result.data.token, result.data.user);
         notifySuccess('Email verified successfully!');
         setTimeout(() => {
           navigate('/');
           window.location.reload();
         }, 1000);
       } else {
-        const errorMessage = data.message || 'Invalid verification code';
-        setErrors({ verification: errorMessage });
-        notifyError(errorMessage);
+        setErrors({ verification: result.errorMessage });
+        notifyError(result.errorMessage);
       }
     } catch (error) {
       const errorMessage = 'Network error. Please try again.';
